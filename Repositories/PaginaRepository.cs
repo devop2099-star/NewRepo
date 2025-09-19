@@ -1,24 +1,17 @@
 ﻿using Npgsql;
-using System;
-using System.Collections.Generic;
-using System.Configuration;
+using Naviguard.Connections;
 using Naviguard.Models.Naviguard.Models;
 
 namespace Naviguard.Repositories
 {
     public class PaginaRepository
     {
-        private readonly string _connectionString;
-
-        public PaginaRepository()
-        {
-            _connectionString = ConfigurationManager.ConnectionStrings["NaviguardDB"].ConnectionString;
-        }
 
         public List<Pagina> ObtenerPaginas()
         {
             var paginas = new List<Pagina>();
-            using (var conn = new NpgsqlConnection(_connectionString))
+
+            using (var conn = ConexionBD.ObtenerConexionNaviguard())
             {
                 conn.Open();
                 var sql = "SELECT id_pagina, nombre_pagina, url, descripcion FROM browser_app.paginas ORDER BY id_pagina";
