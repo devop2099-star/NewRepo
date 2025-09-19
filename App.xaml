@@ -2,8 +2,19 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:Naviguard"
-             StartupUri="MainWindow.xaml">
+             xmlns:converters="clr-namespace:Naviguard.Converters"
+             StartupUri="Views/MenuNaviguard.xaml">
     <Application.Resources>
-         
+
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Assets/Styles.xaml"/>
+                <ResourceDictionary Source="Assets/Icons.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <converters:SizeToRectConverter x:Key="SizeToRectConverter"/>
+
+        </ResourceDictionary>
+
     </Application.Resources>
 </Application>
