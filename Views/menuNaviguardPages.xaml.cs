@@ -1,20 +1,19 @@
-﻿using System.Windows;
+﻿using Naviguard.ViewModels;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
-using Naviguard.ViewModels; 
 
 namespace Naviguard.Views
 {
-    public partial class MenuNaviguard : Window
+    public partial class menuNaviguardPages : UserControl
     {
         private bool isMenuHidden = false;
 
-        public MenuNaviguard()
+        public menuNaviguardPages()
         {
             InitializeComponent();
             DataContext = new MenuNaviguardViewModel();
         }
-
 
         private void TopMenu_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
@@ -39,6 +38,5 @@ namespace Naviguard.Views
                 }
             }
         }
-
     }
 }

@@ -42,22 +42,22 @@ namespace Naviguard.Login
 
         private void txtUsername_GotFocus(object sender, RoutedEventArgs e)
         {
-            borderUsername.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#0078D7")); // azul
+            borderUsername.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#0078D7"));
         }
 
         private void txtUsername_LostFocus(object sender, RoutedEventArgs e)
         {
-            borderUsername.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#CCCCCC")); // gris
+            borderUsername.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#CCCCCC")); 
         }
 
         private void txtPassword_GotFocus(object sender, RoutedEventArgs e)
         {
-            borderPassword.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#0078D7")); // azul
+            borderPassword.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#0078D7")); 
         }
 
         private void txtPassword_LostFocus(object sender, RoutedEventArgs e)
         {
-            borderPassword.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#CCCCCC")); // gris
+            borderPassword.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#CCCCCC")); 
         }
 
         private async void Login_Click(object sender, RoutedEventArgs e)
@@ -71,7 +71,7 @@ namespace Naviguard.Login
 
             if (loginExitoso)
             {
-                var menu = new MenuNaviguard();
+                var menu = new MenuMain();
                 menu.Show();
                 this.Close();
             }

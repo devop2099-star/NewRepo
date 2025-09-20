@@ -6,5 +6,8 @@ namespace Naviguard.ViewModels
     {
         [ObservableProperty]
         private string _url;
+
+        [ObservableProperty]
+        private bool _requiresProxy;
     }
 }

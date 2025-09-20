@@ -1,10 +1,17 @@
-﻿using CefSharp;
-using System.Security.Cryptography.X509Certificates;
+﻿using System.Security.Cryptography.X509Certificates;
+using CefSharp;
+using Naviguard.Proxy;
 
 namespace Naviguard.Handlers
 {
     public class RequestHandler : IRequestHandler
     {
+        private readonly ProxyManager.ProxyInfo _proxyInfo;
+        public RequestHandler(ProxyManager.ProxyInfo proxyInfo)
+        {
+            _proxyInfo = proxyInfo;
+        }
+
         public bool OnCertificateError(IWebBrowser chromiumWebBrowser, IBrowser browser, CefErrorCode errorCode, string requestUrl, ISslInfo sslInfo, IRequestCallback callback)
         {
             callback.Continue(true);
@@ -13,6 +20,14 @@ namespace Naviguard.Handlers
 
         public bool GetAuthCredentials(IWebBrowser chromiumWebBrowser, IBrowser browser, string originUrl, bool isProxy, string host, int port, string realm, string scheme, IAuthCallback callback)
         {
+            if (isProxy)
+            {
+                if (_proxyInfo != null && !string.IsNullOrEmpty(_proxyInfo.Username) && !string.IsNullOrEmpty(_proxyInfo.Password))
+                {
+                    callback.Continue(_proxyInfo.Username, _proxyInfo.Password);
+                    return true; 
+                }
+            }
             return false;
         }
 

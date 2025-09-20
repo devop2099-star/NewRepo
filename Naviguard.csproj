@@ -9,6 +9,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Proxy\NewFile1.cs" />
+    <Compile Remove="Proxy\Proxy.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Proxy\NewFile1.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="CefSharp.Common.NETCore" Version="139.0.280" />
     <PackageReference Include="CefSharp.Wpf.NETCore" Version="139.0.280" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />

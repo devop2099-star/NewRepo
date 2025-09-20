@@ -48,7 +48,12 @@ namespace Naviguard.ViewModels
         {
             if (pagina != null && !string.IsNullOrEmpty(pagina.Url))
             {
-                CurrentContentViewModel = new BrowserViewModel { Url = pagina.Url };
+                var vm = new BrowserViewModel { Url = pagina.Url };
+
+                // 🚀 Le pasamos también si necesita proxy
+                vm.RequiresProxy = pagina.RequiresProxy;
+
+                CurrentContentViewModel = vm;
             }
         }
     }

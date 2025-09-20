@@ -1,0 +1,89 @@
+﻿<Window x:Class="Naviguard.Views.MenuMain"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Naviguard.Views"
+        xmlns:controls="clr-namespace:Naviguard.Control"
+        mc:Ignorable="d"
+        AllowsTransparency="True"
+        Background="Transparent"
+        FontSize="15"
+        Height="700" Width="1200"
+        ResizeMode="NoResize"
+        Title="Nx Sphere" 
+        WindowStyle="None"
+        WindowStartupLocation="CenterScreen">
+    <Border x:Name="MainBorder"
+      CornerRadius="30"
+      Background="White"
+      SnapsToDevicePixels="True"
+      Padding="0">
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <controls:TopBarControl HorizontalAlignment="Right"
+               VerticalAlignment="Top"/>
+
+
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition x:Name="MenuColumn" Width="90"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Border x:Name="SideMenu"
+                  Background="White"
+                  CornerRadius="25"
+                  Margin="20,3,20,28"
+                  Grid.Column="0"
+                  SnapsToDevicePixels="True"
+                  Effect="{DynamicResource ShadowEffect}">
+
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                    
+                        <StackPanel Grid.Row="1"
+                              VerticalAlignment="Center"
+                              HorizontalAlignment="Center">
+
+                            <Button  ToolTip="Naviguard"
+                              x:Name="btnNav"
+                              Click="btnNav_Click"
+                              Background="Transparent"
+                              Style="{StaticResource IconButtonStyle}">
+                                <Path Data="{StaticResource settings}" Fill="#041a23" Width="20" Height="20" Stretch="Uniform"/>
+                            </Button>
+
+                            <Rectangle Height="20" Fill="Transparent"/>
+
+                            <Button ToolTip="Filter Pages"  Click="btnFilterPages_Click"
+                                 Style="{StaticResource IconButtonStyle}">
+                                <Path Data="{StaticResource settings}" Fill="#041a23" Width="20" Height="20" Stretch="Uniform"/>
+                            </Button>
+                            <Rectangle Height="20" Fill="Transparent"/>
+
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Grid x:Name="MainContentArea"
+                Background="White"
+                Grid.Column="1"
+                Margin="0,0,10,15">
+                    <ContentControl x:Name="ContentPresenter" Content="{Binding MyChatSphereView}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+                </Grid>
+
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

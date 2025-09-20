@@ -54,12 +54,12 @@
 
 
         <Border Width="160"
-   Height="40"
-   Background="#0f1217"
-   CornerRadius="0 20 20 0"
-   HorizontalAlignment="Left"
-   VerticalAlignment="Top"
-   Margin="5,37,0,0">
+               Height="40"
+               Background="#0f1217"
+               CornerRadius="0 20 20 0"
+               HorizontalAlignment="Left"
+               VerticalAlignment="Top"
+               Margin="5,37,0,0">
             <TextBlock Text="Nx Sphere"
           Foreground="White"
           FontSize="20"

@@ -14,7 +14,7 @@ namespace Naviguard.Repositories
             using (var conn = ConexionBD.ObtenerConexionNaviguard())
             {
                 conn.Open();
-                var sql = "SELECT id_pagina, nombre_pagina, url, descripcion FROM browser_app.paginas ORDER BY id_pagina";
+                var sql = "page_id, page_name, url, description, requires_proxy FROM browser_app.pages ORDER BY page_id";
                 using (var cmd = new NpgsqlCommand(sql, conn))
                 using (var reader = cmd.ExecuteReader())
                 {
@@ -22,10 +22,12 @@ namespace Naviguard.Repositories
                     {
                         paginas.Add(new Pagina
                         {
-                            IdPagina = Convert.ToInt64(reader["id_pagina"]),
-                            NombrePagina = reader["nombre_pagina"].ToString(),
+                            IdPagina = Convert.ToInt64(reader["page_id"]),
+                            NombrePagina = reader["page_name"].ToString(),
                             Url = reader["url"].ToString(),
-                            Descripcion = reader["descripcion"].ToString()
+                            Descripcion = reader["description"].ToString(),
+                            RequiresProxy = reader["requires_proxy"] != DBNull.Value &&
+                                            Convert.ToBoolean(reader["requires_proxy"])
                         });
                     }
                 }
