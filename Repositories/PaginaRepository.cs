@@ -11,10 +11,11 @@ namespace Naviguard.Repositories
         {
             var paginas = new List<Pagina>();
 
+
             using (var conn = ConexionBD.ObtenerConexionNaviguard())
             {
                 conn.Open();
-                var sql = "page_id, page_name, url, description, requires_proxy FROM browser_app.pages ORDER BY page_id";
+                var sql = "SELECT page_id, page_name, url, description, requires_proxy FROM browser_app.pages ORDER BY page_id";
                 using (var cmd = new NpgsqlCommand(sql, conn))
                 using (var reader = cmd.ExecuteReader())
                 {

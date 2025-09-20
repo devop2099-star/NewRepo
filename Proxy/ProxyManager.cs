@@ -1,6 +1,7 @@
 ﻿using Npgsql;
 using System.Windows;
-using Naviguard.Connections; // Importa el namespace de tu clase de conexión
+using Naviguard.Connections;
+using System.Diagnostics; // Importa el namespace de tu clase de conexión
 
 namespace Naviguard.Proxy
 {
@@ -22,6 +23,7 @@ namespace Naviguard.Proxy
         {
             try
             {
+                Debug.WriteLine("fdsf");
                 // Usa tu clase de conexión estática para obtener una conexión
                 using var connection = ConexionBD.ObtenerConexionNaviguard();
                 connection.Open();
