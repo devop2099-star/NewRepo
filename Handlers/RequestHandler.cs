@@ -20,14 +20,18 @@ namespace Naviguard.Handlers
 
         public bool GetAuthCredentials(IWebBrowser chromiumWebBrowser, IBrowser browser, string originUrl, bool isProxy, string host, int port, string realm, string scheme, IAuthCallback callback)
         {
-            if (isProxy)
+            if (isProxy && _proxyInfo != null &&
+                !string.IsNullOrEmpty(_proxyInfo.Username) &&
+                !string.IsNullOrEmpty(_proxyInfo.Password))
             {
-                if (_proxyInfo != null && !string.IsNullOrEmpty(_proxyInfo.Username) && !string.IsNullOrEmpty(_proxyInfo.Password))
+                using (callback) // asegura la liberación del recurso
                 {
                     callback.Continue(_proxyInfo.Username, _proxyInfo.Password);
-                    return true; 
+                    return true; // credenciales entregadas
                 }
             }
+
+            // si no hay credenciales válidas, devolver false
             return false;
         }
 
