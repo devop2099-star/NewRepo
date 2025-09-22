@@ -19,27 +19,19 @@
                 <TextBlock Text="Añadir Nueva Página" FontSize="18" FontWeight="Bold" Margin="0,0,0,20" Foreground="#1C1E21"/>
 
                 <TextBlock Text="Nombre de la Página:" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                <TextBox x:Name="txtPage" Padding="5" Margin="0,0,0,15" Style="{StaticResource RoundedTextBoxStyle}" Tag="Ingresa el nombre que se mostrará"/>
-               
+                <TextBox Text="{Binding PageName, UpdateSourceTrigger=PropertyChanged}" Padding="5" Margin="0,0,0,15" Style="{StaticResource RoundedTextBoxStyle}" Tag="Ingresa el nombre que se mostrará"/>
+
                 <TextBlock Text="Descripción:" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                <TextBox x:Name="txtDescription" Padding="5" Margin="0,0,0,15" Style="{StaticResource RoundedTextBoxStyle}" Tag="Ingresa la descripción"/>
+                <TextBox Text="{Binding PageDescription, UpdateSourceTrigger=PropertyChanged}" Padding="5" Margin="0,0,0,15" Style="{StaticResource RoundedTextBoxStyle}" Tag="Ingresa la descripción"/>
 
                 <TextBlock Text="URL:" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                <TextBox x:Name="txtUrl" Padding="5" Margin="0,0,0,15" Style="{StaticResource RoundedTextBoxStyle}" Tag="Pega la URL completa de la página"/>
+                <TextBox Text="{Binding PageUrl, UpdateSourceTrigger=PropertyChanged}" Padding="5" Margin="0,0,0,15" Style="{StaticResource RoundedTextBoxStyle}" Tag="Pega la URL completa de la página"/>
 
-                <CheckBox x:Name="chkRequiresProxy" 
-                          Content="Requiere Proxy" 
-                          FontWeight="SemiBold" 
-                          Margin="0,0,0,10" 
-                          Style="{StaticResource ToggleSwitchStyle}"/>
+                <CheckBox IsChecked="{Binding RequiresProxy}" Content="Requiere Proxy" FontWeight="SemiBold" Margin="0,0,0,10" Style="{StaticResource ToggleSwitchStyle}"/>
 
-                <CheckBox x:Name="chkRequiresLogin" 
-                          Content="Requiere Login" 
-                          FontWeight="SemiBold" 
-                          Margin="0,0,0,10" 
-                          Style="{StaticResource ToggleSwitchStyle}"/>
+                <CheckBox x:Name="chkRequiresLogin" IsChecked="{Binding RequiresLogin}" Content="Requiere Login" FontWeight="SemiBold" Margin="0,0,0,10" Style="{StaticResource ToggleSwitchStyle}"/>
 
-                <StackPanel x:Name="pnlLoginFields">
+                <StackPanel>
                     <StackPanel.Style>
                         <Style TargetType="StackPanel">
                             <Setter Property="Visibility" Value="Collapsed"/>
@@ -70,18 +62,18 @@
                             </Style.Triggers>
                         </Style>
                     </StackPanel.Style>
-
                     <Border BorderBrush="#E0E0E0" BorderThickness="0,1,0,0" Margin="0,10,0,10" Padding="0,10,0,0">
                         <StackPanel>
                             <TextBlock Text="Usuario:" FontWeight="SemiBold" Margin="0,5,0,5"/>
-                            <TextBox x:Name="txtDefaultUsername" Padding="5" Margin="0,0,0,15" Style="{StaticResource RoundedTextBoxStyle}" Tag="Ingrese Usuario"/>
+                            <TextBox Text="{Binding CredentialUsername, UpdateSourceTrigger=PropertyChanged}" Padding="5" Margin="0,0,0,15" Style="{StaticResource RoundedTextBoxStyle}" Tag="Ingrese Usuario"/>
 
                             <TextBlock Text="Contraseña:" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                            <TextBox x:Name="pwdDefaultPassword" Padding="5" Margin="0,0,0,15" Style="{StaticResource RoundedTextBoxStyle}" Tag="Ingrese Contraseña"/>
+                            <TextBox Text="{Binding CredentialPassword, UpdateSourceTrigger=PropertyChanged}" Padding="5" Margin="0,0,0,15" Style="{StaticResource RoundedTextBoxStyle}" Tag="Ingrese Contraseña"/>
                         </StackPanel>
                     </Border>
                 </StackPanel>
-                <Button x:Name="btnSavePage" Content="Guardar" Style="{StaticResource PrimaryButtonStyle}" Padding="10,5" HorizontalAlignment="Left" Margin="0,10,0,0"/>
+
+                <Button Command="{Binding SavePageCommand}" Content="Guardar" Style="{StaticResource PrimaryButtonStyle}" Padding="10,5" HorizontalAlignment="Left" Margin="0,10,0,0"/>
             </StackPanel>
         </Border>
 
@@ -98,24 +90,24 @@
 
                 <StackPanel Grid.Row="1" Margin="0,0,0,15">
                     <TextBlock Text="Nombre del Grupo:" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                    <TextBox x:Name="txtGroupName" Padding="5" Margin="0,0,0,15" Style="{StaticResource RoundedTextBoxStyle}" Tag="Introduce un nombre para el nuevo grupo"/>
-                    <TextBlock  Grid.Row="1" Text="Descripción:" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                    <TextBox x:Name="txtGroupDescrip" Padding="5" Margin="0,0,0,15" Style="{StaticResource RoundedTextBoxStyle}" Tag="Ingresa la descripción"/>
+                    <TextBox Text="{Binding GroupName, UpdateSourceTrigger=PropertyChanged}" Padding="5" Margin="0,0,0,15" Style="{StaticResource RoundedTextBoxStyle}" Tag="Introduce un nombre para el nuevo grupo"/>
+
+                    <TextBlock Grid.Row="1" Text="Descripción:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                    <TextBox Text="{Binding GroupDescription, UpdateSourceTrigger=PropertyChanged}" Padding="5" Margin="0,0,0,15" Style="{StaticResource RoundedTextBoxStyle}" Tag="Ingresa la descripción"/>
                 </StackPanel>
-               
 
                 <TextBlock Grid.Row="2" Text="Asignar Páginas:" FontWeight="SemiBold" Margin="0,0,0,5" VerticalAlignment="Top"/>
                 <Border Grid.Row="2" BorderBrush="#DDDFE2" BorderThickness="1" CornerRadius="3" Margin="0,25,0,10">
-                    <ListBox x:Name="lstAvailablePages" SelectionMode="Multiple" BorderThickness="0">
+                    <ListBox ItemsSource="{Binding AvailablePages}" SelectionMode="Multiple" BorderThickness="0">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <CheckBox Content="{Binding PageName}" Margin="5"/>
+                                <CheckBox Content="{Binding PageName}" IsChecked="{Binding IsSelected}" Margin="5"/>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
                 </Border>
 
-                <Button Grid.Row="3" x:Name="btnCreateGroup" Content="Crear" Style="{StaticResource PrimaryButtonStyle}" Padding="10,5" HorizontalAlignment="Left"/>
+                <Button Grid.Row="3" Command="{Binding CreateGroupCommand}" Content="Crear" Style="{StaticResource PrimaryButtonStyle}" Padding="10,5" HorizontalAlignment="Left"/>
             </Grid>
         </Border>
     </Grid>

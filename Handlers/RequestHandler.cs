@@ -1,13 +1,15 @@
 ﻿using System.Security.Cryptography.X509Certificates;
 using CefSharp;
 using Naviguard.Proxy;
+using Naviguard.Models;
+using static Naviguard.Proxy.ProxyManager;
 
 namespace Naviguard.Handlers
 {
     public class RequestHandler : IRequestHandler
     {
-        private readonly ProxyManager.ProxyInfo _proxyInfo;
-        public RequestHandler(ProxyManager.ProxyInfo proxyInfo)
+        private readonly ProxyInfo _proxyInfo;
+        public RequestHandler(ProxyInfo proxyInfo)
         {
             _proxyInfo = proxyInfo;
         }
@@ -20,14 +22,18 @@ namespace Naviguard.Handlers
 
         public bool GetAuthCredentials(IWebBrowser chromiumWebBrowser, IBrowser browser, string originUrl, bool isProxy, string host, int port, string realm, string scheme, IAuthCallback callback)
         {
-            if (isProxy)
+            if (isProxy && _proxyInfo != null &&
+                !string.IsNullOrEmpty(_proxyInfo.Username) &&
+                !string.IsNullOrEmpty(_proxyInfo.Password))
             {
-                if (_proxyInfo != null && !string.IsNullOrEmpty(_proxyInfo.Username) && !string.IsNullOrEmpty(_proxyInfo.Password))
+                using (callback) // asegura la liberación del recurso
                 {
                     callback.Continue(_proxyInfo.Username, _proxyInfo.Password);
-                    return true; 
+                    return true; // credenciales entregadas
                 }
             }
+
+            // si no hay credenciales válidas, devolver false
             return false;
         }
 

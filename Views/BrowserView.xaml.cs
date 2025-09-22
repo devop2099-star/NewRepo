@@ -1,57 +1,64 @@
-﻿using System.Windows.Controls;
-using CefSharp.Core;
+﻿using CefSharp;
 using Naviguard.Handlers;
-using Naviguard.Proxy;
-using Naviguard.ViewModels;
+using Naviguard.Models;
+using System.Windows.Controls;
+using Cef = CefSharp.Cef;
+using System.Windows;
 
 namespace Naviguard.Views
 {
     public partial class BrowserView : UserControl
     {
+
         public BrowserView()
         {
             InitializeComponent();
-           /* this.Loaded += BrowserView_Loaded;*/
+            Browser.LoadingStateChanged += Browser_LoadingStateChanged;
+
         }
-
-       /*private void BrowserView_Loaded(object sender, System.Windows.RoutedEventArgs e)
+        public void LoadPage(Pagina pagina, ProxyInfo? proxyInfo = null)
         {
-            if (DataContext is BrowserViewModel vm)
+            if (pagina.requires_proxy && proxyInfo != null)
             {
-                if (vm.RequiresProxy)
+                var proxySettings = new Dictionary<string, object>
                 {
-                    ApplyProxyIfNeeded();
-                }
+                    ["mode"] = "fixed_servers",
+                    ["server"] = proxyInfo.GetProxyString()
+                };
 
-                // Asigna la URL al navegador
-                Browser.Address = vm.Url;
-            }
-        }
+                var requestContext = new CefSharp.RequestContext(new CefSharp.RequestContextSettings());
 
-        private void ApplyProxyIfNeeded()
-        {
-            var proxyManager = new ProxyManager();
-            var proxyInfo = proxyManager.GetProxy();
-
-            if (proxyInfo != null)
-            {
-                var rcSettings = new RequestContextSettings();
-                rcSettings.PersistSessionCookies = true;
-                rcSettings.PersistUserPreferences = true;
-
-                // ✅ Aquí se pasa el proxy como argumento de Chromium
-                rcSettings.SetPreference("proxy", new
+                // 🔥 Ejecutar en el hilo de CEF
+                Cef.UIThreadTaskFactory.StartNew(() =>
                 {
-                    mode = "fixed_servers",
-                    server = proxyInfo.GetProxyString()
+                    bool success = requestContext.SetPreference("proxy", proxySettings, out string error);
                 });
 
-                var rc = new RequestContext(rcSettings);
-
+                Browser.RequestContext = requestContext;
                 Browser.RequestHandler = new RequestHandler(proxyInfo);
-                Browser.RequestContext = rc;
             }
-        }*/
+            else
+            {
+                Browser.RequestHandler = null;
+            }
+            Browser.Load(pagina.url);
+        }
+
+        private void Browser_LoadingStateChanged(object sender, LoadingStateChangedEventArgs e)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                if (e.IsLoading)
+                {
+                    LoadingOverlay.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    LoadingOverlay.Visibility = Visibility.Collapsed;
+                }
+            });
+        }
 
     }
+
 }

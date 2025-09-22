@@ -4,6 +4,6 @@ namespace Naviguard.Models
 {
     public static class ProxyConfig
     {
-        public static ProxyManager.ProxyInfo CurrentProxy { get; set; }
+        public static ProxyInfo CurrentProxy { get; set; }
     }
 }

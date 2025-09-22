@@ -1,17 +1,14 @@
-﻿// ViewModels/FilterPagesViewModel.cs
-
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Naviguard.Models;
-using System;
+using Naviguard.Repositories;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 
 public class FilterPagesViewModel : ObservableObject
 {
-    // --- Propiedades (sin cambios) ---
+    private readonly PaginaRepository _paginaRepository;
+
     private string _pageName;
     public string PageName { get => _pageName; set => SetProperty(ref _pageName, value); }
 
@@ -33,6 +30,11 @@ public class FilterPagesViewModel : ObservableObject
     private string _groupDescription;
     public string GroupDescription { get => _groupDescription; set => SetProperty(ref _groupDescription, value); }
 
+    private string _credentialUsername;
+    public string CredentialUsername { get => _credentialUsername; set => SetProperty(ref _credentialUsername, value); }
+    private string _credentialPassword;
+    public string CredentialPassword { get => _credentialPassword; set => SetProperty(ref _credentialPassword, value); }
+
     public ObservableCollection<PageListItemViewModel> AvailablePages { get; }
 
     public IAsyncRelayCommand SavePageCommand { get; }
@@ -40,41 +42,43 @@ public class FilterPagesViewModel : ObservableObject
 
     public FilterPagesViewModel()
     {
+        _paginaRepository = new PaginaRepository();
         AvailablePages = new ObservableCollection<PageListItemViewModel>();
         SavePageCommand = new AsyncRelayCommand(SavePageAsync);
         CreateGroupCommand = new AsyncRelayCommand(CreateGroupAsync);
-
         LoadAvailablePages();
     }
 
-    // ===== MÉTODO COMPLETADO =====
     private void LoadAvailablePages()
     {
-        // Simula la carga de datos desde la base de datos
-        var pagesFromDb = new[]
+        try
         {
-            new Page { page_id = 1, page_name = "Google" },
-            new Page { page_id = 2, page_name = "Facebook" },
-            new Page { page_id = 3, page_name = "GitHub" }
-        };
+            var paginasFromDb = _paginaRepository.ObtenerPaginas();
 
-        AvailablePages.Clear();
-        foreach (var page in pagesFromDb)
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                AvailablePages.Clear();
+                foreach (var pagina in paginasFromDb) 
+                {
+                    AvailablePages.Add(new PageListItemViewModel(pagina));
+                }
+            });
+        }
+        catch (Exception ex)
         {
-            AvailablePages.Add(new PageListItemViewModel(page));
+            MessageBox.Show($"Error al cargar las páginas desde la base de datos: {ex.Message}", "Error de Conexión");
         }
     }
 
-    // ===== MÉTODO COMPLETADO =====
     private async Task SavePageAsync()
     {
         if (string.IsNullOrWhiteSpace(PageName) || string.IsNullOrWhiteSpace(PageUrl))
         {
-            MessageBox.Show("El nombre y la URL de la página son obligatorios.", "Error");
+            MessageBox.Show("El nombre y la URL de la página son obligatorios.", "Error de Validación");
             return;
         }
 
-        var newPage = new Page
+        var newPage = new Pagina 
         {
             page_name = this.PageName,
             description = this.PageDescription,
@@ -82,53 +86,45 @@ public class FilterPagesViewModel : ObservableObject
             requires_proxy = this.RequiresProxy,
             requires_login = this.RequiresLogin,
             state = 1,
-            created_at = DateTime.Now
+            created_at = DateTime.UtcNow
         };
 
-        // Aquí iría tu lógica para guardar 'newPage' en la base de datos
-        MessageBox.Show($"Página '{newPage.page_name}' guardada con éxito.", "Éxito");
+        try
+        {
+            long newPageId = await _paginaRepository.AddPageAsync(newPage);
+            if (newPage.requires_login && !string.IsNullOrWhiteSpace(this.CredentialUsername))
+            {
+                await _paginaRepository.AddCredentialAsync(newPageId, this.CredentialUsername, this.CredentialPassword);
+            }
 
-        PageName = string.Empty;
-        PageDescription = string.Empty;
-        PageUrl = string.Empty;
-        RequiresProxy = false;
-        RequiresLogin = false;
-        LoadAvailablePages(); 
+            MessageBox.Show($"Página '{newPage.page_name}' guardada con éxito.", "Éxito");
+
+            PageName = string.Empty;
+            PageDescription = string.Empty;
+            PageUrl = string.Empty;
+            RequiresProxy = false;
+            RequiresLogin = false;
+
+            LoadAvailablePages();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error al guardar la página: {ex.Message}", "Error de Base de Datos");
+        }
     }
 
     private async Task CreateGroupAsync()
     {
-        if (string.IsNullOrWhiteSpace(GroupName))
-        {
-            MessageBox.Show("El nombre del grupo es obligatorio.", "Error de Validación");
-            return;
+        if (string.IsNullOrWhiteSpace(GroupName)) { 
+            MessageBox.Show("El nombre del grupo es obligatorio.", "Error"); return; 
         }
-
-        var newGroup = new PageGroup
-        {
-            group_name = this.GroupName,
-            description = this.GroupDescription
-        };
-
-        long newGroupId = new Random().Next(100, 1000);
-
         var selectedPages = AvailablePages.Where(p => p.IsSelected).ToList();
-
-        foreach (var pageVM in selectedPages)
-        {
-            Console.WriteLine($"Asignando Página ID {pageVM.PageData.page_id} a Grupo ID {newGroupId}");
-        }
-
-        MessageBox.Show($"Grupo '{newGroup.group_name}' creado con {selectedPages.Count} página(s) asignada(s).", "Éxito");
-
+        MessageBox.Show($"Grupo '{GroupName}' creado con {selectedPages.Count} página(s) asignada(s).", "Éxito");
         GroupName = string.Empty;
         GroupDescription = string.Empty;
         foreach (var pageVM in AvailablePages)
         {
             pageVM.IsSelected = false;
         }
-
-
-
     }
 }

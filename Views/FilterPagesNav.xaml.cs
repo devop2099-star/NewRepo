@@ -8,6 +8,7 @@ namespace Naviguard.Views
         public FilterPagesNav()
         {
             InitializeComponent();
+            this.DataContext = new FilterPagesViewModel();
         }
     }
 }

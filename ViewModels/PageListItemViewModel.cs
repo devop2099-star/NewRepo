@@ -4,7 +4,7 @@ using Naviguard.Models;
 public class PageListItemViewModel : ObservableObject
 {
     private bool _isSelected;
-    public Page PageData { get; }
+    public Pagina PageData { get; }
 
     public bool IsSelected
     {
@@ -14,5 +14,8 @@ public class PageListItemViewModel : ObservableObject
 
     public string PageName => PageData.page_name;
 
-    public PageListItemViewModel(Page page) => PageData = page;
+    public PageListItemViewModel(Pagina pagina)
+    {
+        PageData = pagina;
+    }
 }

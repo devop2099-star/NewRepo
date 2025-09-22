@@ -1,29 +1,16 @@
 ﻿using Npgsql;
 using System.Windows;
 using Naviguard.Connections;
-using System.Diagnostics; // Importa el namespace de tu clase de conexión
+using Naviguard.Models;
 
 namespace Naviguard.Proxy
 {
     public class ProxyManager
     {
-        // Clase interna para contener la información del proxy
-        public class ProxyInfo
-        {
-            public string Host { get; set; }
-            public int Port { get; set; }
-            public string Username { get; set; }
-            public string Password { get; set; }
-
-            // Método para obtener la cadena de dirección del proxy
-            public string GetProxyString() => $"{Host}:{Port}";
-        }
-
         public ProxyInfo GetProxy()
         {
             try
             {
-                Debug.WriteLine("fdsf");
                 // Usa tu clase de conexión estática para obtener una conexión
                 using var connection = ConexionBD.ObtenerConexionNaviguard();
                 connection.Open();
