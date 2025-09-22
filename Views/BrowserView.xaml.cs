@@ -1,9 +1,9 @@
-﻿using CefSharp;
+﻿using Cef = CefSharp.Cef;
 using Naviguard.Handlers;
-using Naviguard.Models;
+using Naviguard.Models.Naviguard.Models;
+using Naviguard.Proxy;
+using System.Diagnostics;
 using System.Windows.Controls;
-using Cef = CefSharp.Cef;
-using System.Windows;
 
 namespace Naviguard.Views
 {
@@ -13,13 +13,14 @@ namespace Naviguard.Views
         public BrowserView()
         {
             InitializeComponent();
-            Browser.LoadingStateChanged += Browser_LoadingStateChanged;
 
         }
-        public void LoadPage(Pagina pagina, ProxyInfo? proxyInfo = null)
+        public void LoadPage(Pagina pagina, ProxyManager.ProxyInfo? proxyInfo = null)
         {
-            if (pagina.requires_proxy && proxyInfo != null)
+            if (pagina.RequiresProxy && proxyInfo != null)
             {
+                Debug.WriteLine($"🌐 Aplicando proxy: {proxyInfo.GetProxyString()} para la página {pagina.NombrePagina}");
+
                 var proxySettings = new Dictionary<string, object>
                 {
                     ["mode"] = "fixed_servers",
@@ -32,6 +33,9 @@ namespace Naviguard.Views
                 Cef.UIThreadTaskFactory.StartNew(() =>
                 {
                     bool success = requestContext.SetPreference("proxy", proxySettings, out string error);
+                    Debug.WriteLine(success
+                        ? $"✅ Proxy aplicado correctamente ({proxyInfo.GetProxyString()})"
+                        : $"⚠️ Error al aplicar proxy: {error}");
                 });
 
                 Browser.RequestContext = requestContext;
@@ -39,25 +43,15 @@ namespace Naviguard.Views
             }
             else
             {
+                Debug.WriteLine($"⚡ Cargando sin proxy la página: {pagina.NombrePagina}");
                 Browser.RequestHandler = null;
             }
-            Browser.Load(pagina.url);
+
+            Debug.WriteLine($"➡️ Navegando a: {pagina.Url}");
+            Browser.Load(pagina.Url);
         }
 
-        private void Browser_LoadingStateChanged(object sender, LoadingStateChangedEventArgs e)
-        {
-            Dispatcher.Invoke(() =>
-            {
-                if (e.IsLoading)
-                {
-                    LoadingOverlay.Visibility = Visibility.Visible;
-                }
-                else
-                {
-                    LoadingOverlay.Visibility = Visibility.Collapsed;
-                }
-            });
-        }
+
 
     }
 
