@@ -5,7 +5,7 @@ using Naviguard.Proxy;
 using Naviguard.Repositories;
 using Naviguard.Views;
 using System.Collections.ObjectModel;
-using static Naviguard.Proxy.ProxyManager;
+using System.Text.RegularExpressions;
 
 namespace Naviguard.ViewModels
 {
@@ -13,38 +13,32 @@ namespace Naviguard.ViewModels
     {
         [ObservableProperty]
         private object _currentContentViewModel;
-
-        public ObservableCollection<Pagina> Paginas { get; set; }
-        private readonly PaginaRepository _paginaRepository;
+        public ObservableCollection<Group> Grupos { get; set; }
+        private readonly GrupoRepository _grupoRepository;
 
         public MenuNaviguardViewModel()
         {
-            _paginaRepository = new PaginaRepository();
-            Paginas = new ObservableCollection<Pagina>();
-            CargarPaginas();
-
-            if (Paginas.Count > 0)
-            {
-                Navigate(Paginas[0]);
-            }
+            _grupoRepository = new GrupoRepository();
+            Grupos = new ObservableCollection<Group>();
+            CargarGrupos();
         }
 
-        private void CargarPaginas()
+        private void CargarGrupos()
         {
             try
             {
-                var paginasDesdeDb = _paginaRepository.ObtenerPaginas();
-                foreach (var pagina in paginasDesdeDb)
+                var gruposDesdeDb = _grupoRepository.ObtenerGruposConPaginas();
+                foreach (var grupo in gruposDesdeDb)
                 {
-                    Paginas.Add(pagina);
+                    Grupos.Add(grupo);
                 }
             }
             catch (System.Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al cargar páginas desde la BD: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error al cargar grupos desde la BD: {ex.Message}");
             }
         }
-
+            
         [RelayCommand]
         private void Navigate(Pagina pagina)
         {

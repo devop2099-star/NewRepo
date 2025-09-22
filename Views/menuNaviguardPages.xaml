@@ -9,6 +9,7 @@
              xmlns:vm="clr-namespace:Naviguard.ViewModels"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+
     <UserControl.DataContext>
         <vm:MenuNaviguardViewModel/>
     </UserControl.DataContext>
@@ -71,7 +72,7 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <Grid Grid.Row="0">
+            <Grid Grid.Row="0" Background="Aqua">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
@@ -81,21 +82,35 @@
                 <Grid x:Name="MenuContainerGrid" Grid.Column="1" VerticalAlignment="Top" Height="60">
                     <Border x:Name="TopMenu" Background="{StaticResource TopBarBackgroundBrush}"  CornerRadius="21" Height="42" Margin="0,10,0,0" VerticalAlignment="Top" Effect="{StaticResource ShadowEffect}" Panel.ZIndex="99">
 
-                        <ItemsControl ItemsSource="{Binding Paginas}">
+                        <ItemsControl ItemsSource="{Binding Grupos}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" PreviewMouseLeftButtonDown="TopMenu_PreviewMouseLeftButtonDown"/>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
 
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Button ToolTip="{Binding NombrePagina}"
-                                            Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                            CommandParameter="{Binding}"
-                                            Style="{StaticResource ModernIconButtonStyle}" 
-                                            Margin="10,0,0,0">
-                                        <Path Data="{StaticResource BrowserIcon}" Fill="{StaticResource IconColor}" Width="20" Height="20" Stretch="Uniform"/>
+                                    <Button Content="{Binding group_name}"
+                    ToolTip="{Binding description}"
+                    Style="{StaticResource ModernIconButtonStyle}"
+                    Margin="10,0,0,0"
+                    Click="GroupButton_Click">
+                                        <Button.ContextMenu>
+                                            <ContextMenu ItemsSource="{Binding Paginas}">
+                                                <ContextMenu.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <MenuItem Header="{Binding page_name}"
+                                          Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                          CommandParameter="{Binding}">
+                                                            <MenuItem.Icon>
+                                                                <Path Data="{StaticResource BrowserIcon}" Fill="#1C1E21" Width="16" Height="16"/>
+                                                            </MenuItem.Icon>
+                                                        </MenuItem>
+                                                    </DataTemplate>
+                                                </ContextMenu.ItemTemplate>
+                                            </ContextMenu>
+                                        </Button.ContextMenu>
                                     </Button>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
