@@ -1,26 +1,35 @@
-﻿using Cef = CefSharp.Cef;
+﻿using CefSharp;
 using Naviguard.Handlers;
-using Naviguard.Models.Naviguard.Models;
+using Naviguard.Models;
 using Naviguard.Proxy;
+using Naviguard.Repositories;
 using System.Diagnostics;
+using System.Windows;
 using System.Windows.Controls;
+using Cef = CefSharp.Cef;
 
 namespace Naviguard.Views
 {
     public partial class BrowserView : UserControl
     {
-
+        private PageCredential? _credencialActual;
+        private Pagina _paginaActual;
+        private bool _isAutoLoginRunning = false;
         public BrowserView()
         {
             InitializeComponent();
-
+            Browser.LoadingStateChanged += Browser_LoadingStateChanged;
         }
-        public void LoadPage(Pagina pagina, ProxyManager.ProxyInfo? proxyInfo = null)
+        public void LoadPage(Pagina pagina, ProxyInfo? proxyInfo = null)
         {
-            if (pagina.RequiresProxy && proxyInfo != null)
-            {
-                Debug.WriteLine($"🌐 Aplicando proxy: {proxyInfo.GetProxyString()} para la página {pagina.NombrePagina}");
+            _paginaActual = pagina;
 
+            // 🚀 Buscar credenciales en la BD
+            var credRepo = new PageCredentialRepository();
+            _credencialActual = credRepo.ObtenerCredencialPorPagina(pagina.page_id);
+
+            if (pagina.requires_proxy && proxyInfo != null)
+            {
                 var proxySettings = new Dictionary<string, object>
                 {
                     ["mode"] = "fixed_servers",
@@ -29,13 +38,9 @@ namespace Naviguard.Views
 
                 var requestContext = new CefSharp.RequestContext(new CefSharp.RequestContextSettings());
 
-                // 🔥 Ejecutar en el hilo de CEF
                 Cef.UIThreadTaskFactory.StartNew(() =>
                 {
-                    bool success = requestContext.SetPreference("proxy", proxySettings, out string error);
-                    Debug.WriteLine(success
-                        ? $"✅ Proxy aplicado correctamente ({proxyInfo.GetProxyString()})"
-                        : $"⚠️ Error al aplicar proxy: {error}");
+                    requestContext.SetPreference("proxy", proxySettings, out string error);
                 });
 
                 Browser.RequestContext = requestContext;
@@ -43,15 +48,62 @@ namespace Naviguard.Views
             }
             else
             {
-                Debug.WriteLine($"⚡ Cargando sin proxy la página: {pagina.NombrePagina}");
                 Browser.RequestHandler = null;
             }
 
-            Debug.WriteLine($"➡️ Navegando a: {pagina.Url}");
-            Browser.Load(pagina.Url);
+            Browser.JsDialogHandler = new JsDialogHandler();
+            Browser.MenuHandler = new NoContextMenuHandler();
+            Browser.Load(pagina.url);
         }
 
-
+        private void Browser_LoadingStateChanged(object sender, LoadingStateChangedEventArgs e)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                if (e.IsLoading)
+                {
+                    LoadingOverlay.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    if (_credencialActual != null)
+                    {
+                        _isAutoLoginRunning = true;
+                        EjecutarAutoLogin();
+                    }
+                    else
+                    {
+                        LoadingOverlay.Visibility = Visibility.Collapsed;
+                    }
+                }
+            });
+        }
+        private async void EjecutarAutoLogin()
+        {
+            try
+            {
+                // Esperar a que DOM esté listo
+                await Browser.GetMainFrame().EvaluateScriptAsync($@"
+                    document.getElementById('txtemail').value = '{_credencialActual.Username}';
+                    document.getElementById('txtpas').value = '{_credencialActual.Password}';
+                    document.getElementById('txtcarac').value = document.getElementById('txtcodcarac').value;
+                    document.querySelector('.btn_access').click();
+                ");
+                Dispatcher.Invoke(() =>
+                {
+                    LoadingOverlay.Visibility = Visibility.Collapsed;
+                    _isAutoLoginRunning = false;
+                });
+            }
+            catch (Exception ex)
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    LoadingOverlay.Visibility = Visibility.Collapsed;
+                    _isAutoLoginRunning = false;
+                });
+            }
+        }
 
     }
 

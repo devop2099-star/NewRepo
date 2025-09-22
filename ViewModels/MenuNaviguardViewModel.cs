@@ -1,8 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Naviguard.Models;
+using Naviguard.Proxy;
 using Naviguard.Repositories;
-using Naviguard.Models.Naviguard.Models;
+using Naviguard.Views;
+using System.Collections.ObjectModel;
+using static Naviguard.Proxy.ProxyManager;
 
 namespace Naviguard.ViewModels
 {
@@ -45,11 +48,20 @@ namespace Naviguard.ViewModels
         [RelayCommand]
         private void Navigate(Pagina pagina)
         {
-            if (pagina != null && !string.IsNullOrEmpty(pagina.Url))
+            if (pagina == null || string.IsNullOrEmpty(pagina.url)) return;
+
+            var browserView = new BrowserView();
+
+            ProxyInfo? proxyInfo = null;
+            if (pagina.requires_proxy)
             {
                 var proxyManager = new ProxyManager();
                 proxyInfo = proxyManager.GetProxy();
             }
+
+            PageCredential? credencial = null;
+            var credRepo = new PageCredentialRepository();
+            credencial = credRepo.ObtenerCredencialPorPagina(pagina.page_id);
 
             browserView.LoadPage(pagina, proxyInfo);
 

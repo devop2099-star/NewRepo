@@ -19,8 +19,8 @@
         </DataTemplate>
 
         <converters:SizeToRectConverter x:Key="SizeToRectConverter"/>
-        <Color x:Key="BackgroundColorStart">#F5F7FA</Color>
-        <Color x:Key="BackgroundColorEnd">#E6E9ED</Color>
+        <Color x:Key="BackgroundColorStart">#ffffff</Color>
+        <Color x:Key="BackgroundColorEnd">#ffffff</Color>
         <SolidColorBrush x:Key="IconColor" Color="White"/>
         <SolidColorBrush x:Key="TopBarBackgroundBrush" Color="#D9191C20"/>
         <SolidColorBrush x:Key="ButtonHoverBrush" Color="#3FFFFFFF"/>

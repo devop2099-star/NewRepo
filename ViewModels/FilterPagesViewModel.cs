@@ -115,16 +115,36 @@ public class FilterPagesViewModel : ObservableObject
 
     private async Task CreateGroupAsync()
     {
-        if (string.IsNullOrWhiteSpace(GroupName)) { 
-            MessageBox.Show("El nombre del grupo es obligatorio.", "Error"); return; 
-        }
-        var selectedPages = AvailablePages.Where(p => p.IsSelected).ToList();
-        MessageBox.Show($"Grupo '{GroupName}' creado con {selectedPages.Count} página(s) asignada(s).", "Éxito");
-        GroupName = string.Empty;
-        GroupDescription = string.Empty;
-        foreach (var pageVM in AvailablePages)
+        if (string.IsNullOrWhiteSpace(GroupName))
         {
-            pageVM.IsSelected = false;
+            MessageBox.Show("El nombre del grupo es obligatorio.", "Error de Validación");
+            return;
+        }
+
+        var selectedPageVMs = AvailablePages.Where(p => p.IsSelected).ToList();
+        if (selectedPageVMs.Count == 0)
+        {
+            MessageBox.Show("Debes seleccionar al menos una página para el grupo.", "Error de Validación");
+            return;
+        }
+
+        try
+        {
+            var selectedPageIds = selectedPageVMs.Select(p => p.PageData.page_id).ToList();
+            long newGroupId = await _paginaRepository.AddGroupAsync(this.GroupName, this.GroupDescription);
+            await _paginaRepository.AddPagesToGroupAsync(newGroupId, selectedPageIds);
+            MessageBox.Show($"Grupo '{GroupName}' creado con {selectedPageVMs.Count} página(s) asignada(s).", "Éxito");
+
+            GroupName = string.Empty;
+            GroupDescription = string.Empty;
+            foreach (var pageVM in AvailablePages)
+            {
+                pageVM.IsSelected = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error al crear el grupo: {ex.Message}", "Error de Base de Datos");
         }
     }
 }

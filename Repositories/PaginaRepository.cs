@@ -84,5 +84,53 @@ namespace Naviguard.Repositories
                 }
             }
         }
+        public async Task<long> AddGroupAsync(string groupName, string description)
+        {
+            using (var conn = ConexionBD.ObtenerConexionNaviguard())
+            {
+                await conn.OpenAsync();
+                var sql = @"
+                    INSERT INTO browser_app.page_groups
+                    (group_name, description, created_at, state)
+                    VALUES
+                    (@group_name, @description, @created_at, @state)
+                    RETURNING group_id;";
+
+                using (var cmd = new NpgsqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@group_name", groupName);
+                    cmd.Parameters.AddWithValue("@description", (object)description ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@created_at", DateTime.UtcNow);
+                    cmd.Parameters.AddWithValue("@state", 1);
+
+                    var newId = await cmd.ExecuteScalarAsync();
+                    return Convert.ToInt64(newId);
+                }
+            }
+        }
+        public async Task AddPagesToGroupAsync(long groupId, List<long> pageIds)
+        {
+            using (var conn = ConexionBD.ObtenerConexionNaviguard())
+            {
+                await conn.OpenAsync();
+
+                foreach (var pageId in pageIds)
+                {
+                    var sql = @"
+                        INSERT INTO browser_app.group_pages
+                        (group_id, page_id, state)
+                        VALUES
+                        (@group_id, @page_id, @state);";
+
+                    using (var cmd = new NpgsqlCommand(sql, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@group_id", groupId);
+                        cmd.Parameters.AddWithValue("@page_id", pageId);
+                        cmd.Parameters.AddWithValue("@state", 1);
+                        await cmd.ExecuteNonQueryAsync();
+                    }
+                }
+            }
+        }
     }
 }

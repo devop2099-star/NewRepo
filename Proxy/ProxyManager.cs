@@ -11,19 +11,15 @@ namespace Naviguard.Proxy
         {
             try
             {
-                // Usa tu clase de conexión estática para obtener una conexión
                 using var connection = ConexionBD.ObtenerConexionNaviguard();
                 connection.Open();
 
-                // La consulta se actualiza para incluir el esquema de la tabla
-                // y seleccionar las columnas correctas
                 string query = "SELECT host, port, username, password FROM browser_app.proxies WHERE proxy_id IS NOT NULL LIMIT 1;";
                 using var cmd = new NpgsqlCommand(query, connection);
                 using var reader = cmd.ExecuteReader();
 
                 if (reader.Read())
                 {
-                    // Lee los valores de las columnas y los asigna a un nuevo objeto ProxyInfo
                     return new ProxyInfo
                     {
                         Host = reader["host"].ToString(),
@@ -36,11 +32,9 @@ namespace Naviguard.Proxy
             }
             catch (Exception ex)
             {
-                // Captura y muestra errores de conexión o lectura
                 MessageBox.Show($"Error al obtener proxy: {ex.Message}", "Error");
             }
 
-            // Devuelve null si no se encuentra ningún proxy o si ocurre un error
             return null;
         }
     }

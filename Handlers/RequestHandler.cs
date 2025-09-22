@@ -2,7 +2,6 @@
 using CefSharp;
 using Naviguard.Proxy;
 using Naviguard.Models;
-using static Naviguard.Proxy.ProxyManager;
 
 namespace Naviguard.Handlers
 {
@@ -74,6 +73,58 @@ namespace Naviguard.Handlers
         }
 
         public bool OnSelectClientCertificate(IWebBrowser chromiumWebBrowser, IBrowser browser, bool isProxy, string host, int port, X509Certificate2Collection certificates, ISelectClientCertificateCallback callback)
+        {
+            return false;
+        }
+    }
+    public class JsDialogHandler : IJsDialogHandler
+    {
+        public bool OnJSDialog(IWebBrowser chromiumWebBrowser, IBrowser browser, string originUrl, CefJsDialogType dialogType, string messageText, string defaultPromptText, IJsDialogCallback callback, ref bool suppressMessage)
+        {
+            if (dialogType == CefJsDialogType.Confirm)
+            {
+                callback.Continue(true);
+                return true;
+            }
+            else if (dialogType == CefJsDialogType.Alert)
+            {
+                callback.Continue(true);
+                return true;
+            }
+            else if (dialogType == CefJsDialogType.Prompt)
+            {
+                callback.Continue(true, defaultPromptText);
+                return true;
+            }
+
+            return false;
+        }
+        public bool OnBeforeUnloadDialog(IWebBrowser chromiumWebBrowser, IBrowser browser, string messageText, bool isReload, IJsDialogCallback callback)
+        {
+            callback.Continue(true);
+            return true;
+        }
+        public void OnDialogClosed(IWebBrowser chromiumWebBrowser, IBrowser browser) { }
+
+        public void OnResetDialogState(IWebBrowser chromiumWebBrowser, IBrowser browser) { }
+    }
+    public class NoContextMenuHandler : IContextMenuHandler
+    {
+        public void OnBeforeContextMenu(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, IMenuModel model)
+        {
+            model.Clear();
+        }
+
+        public bool OnContextMenuCommand(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, CefMenuCommand commandId, CefEventFlags eventFlags)
+        {
+            return false;
+        }
+
+        public void OnContextMenuDismissed(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame)
+        {
+        }
+
+        public bool RunContextMenu(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, IMenuModel model, IRunContextMenuCallback callback)
         {
             return false;
         }
