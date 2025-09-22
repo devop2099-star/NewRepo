@@ -1,9 +1,12 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System.Collections.ObjectModel;
 using Naviguard.Models;
-using Naviguard.Repositories;
 using Naviguard.Models.Naviguard.Models;
+using Naviguard.Proxy;
+using Naviguard.Repositories;
+using Naviguard.Views;
+using System.Collections.ObjectModel;
+using static Naviguard.Proxy.ProxyManager;
 
 namespace Naviguard.ViewModels
 {
@@ -46,15 +49,20 @@ namespace Naviguard.ViewModels
         [RelayCommand]
         private void Navigate(Pagina pagina)
         {
-            if (pagina != null && !string.IsNullOrEmpty(pagina.Url))
+            if (pagina == null || string.IsNullOrEmpty(pagina.Url)) return;
+
+            var browserView = new BrowserView();
+
+            ProxyManager.ProxyInfo? proxyInfo = null;
+            if (pagina.RequiresProxy)
             {
-                var vm = new BrowserViewModel { Url = pagina.Url };
-
-                // 🚀 Le pasamos también si necesita proxy
-                vm.RequiresProxy = pagina.RequiresProxy;
-
-                CurrentContentViewModel = vm;
+                var proxyManager = new ProxyManager();
+                proxyInfo = proxyManager.GetProxy();
             }
+
+            browserView.LoadPage(pagina, proxyInfo);
+
+            CurrentContentViewModel = browserView;
         }
     }
 }
