@@ -99,7 +99,10 @@
                 <StackPanel Grid.Row="1" Margin="0,0,0,15">
                     <TextBlock Text="Nombre del Grupo:" FontWeight="SemiBold" Margin="0,0,0,5"/>
                     <TextBox x:Name="txtGroupName" Padding="5" Margin="0,0,0,15" Style="{StaticResource RoundedTextBoxStyle}" Tag="Introduce un nombre para el nuevo grupo"/>
+                    <TextBlock  Grid.Row="1" Text="Descripción:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                    <TextBox x:Name="txtGroupDescrip" Padding="5" Margin="0,0,0,15" Style="{StaticResource RoundedTextBoxStyle}" Tag="Ingresa la descripción"/>
                 </StackPanel>
+               
 
                 <TextBlock Grid.Row="2" Text="Asignar Páginas:" FontWeight="SemiBold" Margin="0,0,0,5" VerticalAlignment="Top"/>
                 <Border Grid.Row="2" BorderBrush="#DDDFE2" BorderThickness="1" CornerRadius="3" Margin="0,25,0,10">
