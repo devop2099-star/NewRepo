@@ -1,5 +1,4 @@
-﻿using Naviguard.ViewModels;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
@@ -13,17 +12,23 @@ namespace Naviguard.Views
         public menuNaviguardPages()
         {
             InitializeComponent();
-            DataContext = new MenuNaviguardViewModel();
         }
         private void GroupButton_Click(object sender, RoutedEventArgs e)
         {
-            // Obtiene el botón que fue presionado
             var button = sender as Button;
             if (button != null && button.ContextMenu != null)
             {
-                // Le dice al ContextMenu que se posicione relativo al botón
                 button.ContextMenu.PlacementTarget = button;
-                // Abre el ContextMenu
+                button.ContextMenu.IsOpen = true;
+            }
+        }
+
+        private void OpenPagesMenu_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Button;
+            if (button != null && button.ContextMenu != null)
+            {
+                button.ContextMenu.PlacementTarget = button;
                 button.ContextMenu.IsOpen = true;
             }
         }

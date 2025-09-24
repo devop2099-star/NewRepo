@@ -5,61 +5,91 @@ using Naviguard.Proxy;
 using Naviguard.Repositories;
 using Naviguard.Views;
 using System.Collections.ObjectModel;
-using System.Text.RegularExpressions;
+using System.Diagnostics;
+using System.Windows;
 
 namespace Naviguard.ViewModels
 {
     public partial class MenuNaviguardViewModel : ObservableObject
     {
         [ObservableProperty]
-        private object _currentContentViewModel;
-        public ObservableCollection<Group> Grupos { get; set; }
-        private readonly GrupoRepository _grupoRepository;
+        private object _currentBrowserView;
 
-        public MenuNaviguardViewModel()
+        public ObservableCollection<Pagina> PaginasDelGrupo { get; set; }
+        public ObservableCollection<Pagina> PestañasAbiertas { get; set; }
+
+        [ObservableProperty]
+        private Pagina _pestañaSeleccionada;
+
+        private readonly GrupoRepository _grupoRepository;
+        private readonly long _groupId;
+
+        public MenuNaviguardViewModel(long groupId)
         {
             _grupoRepository = new GrupoRepository();
-            Grupos = new ObservableCollection<Group>();
-            CargarGrupos();
+            _groupId = groupId;
+            Debug.WriteLine($"[MenuNaviguardViewModel] ViewModel creado para el Group ID: {_groupId}");
+            PaginasDelGrupo = new ObservableCollection<Pagina>();
+            PestañasAbiertas = new ObservableCollection<Pagina>();
+            CargarPaginasDelGrupo();
         }
 
-        private void CargarGrupos()
+        private void CargarPaginasDelGrupo()
         {
-            try
+            var paginas = _grupoRepository.ObtenerPaginasPorGrupo(_groupId);
+            Debug.WriteLine($"[MenuNaviguardViewModel] Se encontraron {paginas.Count} páginas para el Group ID: {_groupId}");
+
+            foreach (var p in paginas)
             {
-                var gruposDesdeDb = _grupoRepository.ObtenerGruposConPaginas();
-                foreach (var grupo in gruposDesdeDb)
-                {
-                    Grupos.Add(grupo);
-                }
-            }
-            catch (System.Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error al cargar grupos desde la BD: {ex.Message}");
+                PaginasDelGrupo.Add(p);
             }
         }
-            
+
         [RelayCommand]
-        private void Navigate(Pagina pagina)
+        private void AbrirPagina(Pagina pagina)
         {
-            if (pagina == null || string.IsNullOrEmpty(pagina.url)) return;
+            if (pagina == null) return;
 
-            var browserView = new BrowserView();
-
-            ProxyInfo? proxyInfo = null;
-            if (pagina.requires_proxy)
+            if (!PestañasAbiertas.Any(p => p.page_id == pagina.page_id))
             {
-                var proxyManager = new ProxyManager();
-                proxyInfo = proxyManager.GetProxy();
+                if (PestañasAbiertas.Count >= 5)
+                {
+                   Debug.WriteLine("No puedes abrir más de 5 pestañas.", "Límite de Pestañas Alcanzado", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return; 
+                }
+                PestañasAbiertas.Add(pagina);
             }
-
-            PageCredential? credencial = null;
-            var credRepo = new PageCredentialRepository();
-            credencial = credRepo.ObtenerCredencialPorPagina(pagina.page_id);
-
-            browserView.LoadPage(pagina, proxyInfo);
-
-            CurrentContentViewModel = browserView;
+            PestañaSeleccionada = pagina;
         }
+
+        [RelayCommand]
+        private void CerrarPestaña(Pagina pagina)
+        {
+            if (pagina == null) return;
+            PestañasAbiertas.Remove(pagina);
+        }
+
+        partial void OnPestañaSeleccionadaChanged(Pagina value)
+        {
+            if (value != null)
+            {
+                var browserView = new BrowserView();
+                ProxyInfo? proxyInfo = null;
+                if (value.requires_proxy)
+                {
+                    var proxyManager = new ProxyManager();
+                    proxyInfo = proxyManager.GetProxy();
+                }
+
+                browserView.LoadPage(value, proxyInfo);
+
+                CurrentBrowserView = browserView;
+            }
+            else
+            {
+                CurrentBrowserView = null;
+            }
+        }
+
     }
 }

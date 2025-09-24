@@ -9,7 +9,8 @@
         AllowsTransparency="True"
         Background="Transparent"
         FontSize="15"
-        Height="700" Width="1200"
+        Height="691" Width="1020"
+        MinWidth="1020" MinHeight="691"
         ResizeMode="NoResize"
         Title="Nx Sphere" 
         WindowStyle="None"
@@ -71,7 +72,10 @@
                                 <Path Data="{StaticResource settings}" Fill="#041a23" Width="20" Height="20" Stretch="Uniform"/>
                             </Button>
                             <Rectangle Height="20" Fill="Transparent"/>
-
+                            <Button ToolTip="Edit Groups"  Click="btnEditGroups_Click"
+                             Style="{StaticResource IconButtonStyle}">
+                                <Path Data="{StaticResource settings}" Fill="#041a23" Width="20" Height="20" Stretch="Uniform"/>
+                            </Button>
                         </StackPanel>
                     </Grid>
                 </Border>

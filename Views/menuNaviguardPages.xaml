@@ -3,66 +3,112 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:converters="clr-namespace:Naviguard.Converters"             
-             xmlns:cefSharp="clr-namespace:CefSharp.Wpf;assembly=CefSharp.Wpf"             
+             xmlns:converters="clr-namespace:Naviguard.Converters"
              xmlns:local="clr-namespace:Naviguard.Views"
              xmlns:vm="clr-namespace:Naviguard.ViewModels"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-
-    <UserControl.DataContext>
-        <vm:MenuNaviguardViewModel/>
-    </UserControl.DataContext>
+             d:DesignHeight="600" d:DesignWidth="900">
 
     <UserControl.Resources>
-        <DataTemplate DataType="{x:Type vm:BrowserViewModel}">
-            <local:BrowserView/>
-        </DataTemplate>
-
         <converters:SizeToRectConverter x:Key="SizeToRectConverter"/>
-        <Color x:Key="BackgroundColorStart">#ffffff</Color>
-        <Color x:Key="BackgroundColorEnd">#ffffff</Color>
-        <SolidColorBrush x:Key="IconColor" Color="White"/>
-        <SolidColorBrush x:Key="TopBarBackgroundBrush" Color="#D9191C20"/>
-        <SolidColorBrush x:Key="ButtonHoverBrush" Color="#3FFFFFFF"/>
+        <SolidColorBrush x:Key="TopBarBackgroundBrush" Color="#D91E1E1E"/>
         <DropShadowEffect x:Key="ShadowEffect" Color="#000000" Direction="270" ShadowDepth="2" BlurRadius="10" Opacity="0.15"/>
-        <PathGeometry x:Key="BrowserIcon">M12,2 C6.48,2 2,6.48 2,12 C2,17.52 6.48,22 12,22 C17.52,22 22,17.52 22,12 C22,6.48 17.52,2 12,2 Z M10,16.5 V7.5 L16,12 L10,16.5 Z</PathGeometry>
 
-        <Storyboard x:Key="HideTopMenuStoryboard">
-            <DoubleAnimation Storyboard.TargetName="MenuContainerGrid" Storyboard.TargetProperty="Height" To="30" Duration="0:0:0.3">
-                <DoubleAnimation.EasingFunction>
-                    <CubicEase EasingMode="EaseIn"/>
-                </DoubleAnimation.EasingFunction>
-            </DoubleAnimation>
-            <DoubleAnimation Storyboard.TargetName="TopMenu" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.2"/>
-            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="MenuHandle" Storyboard.TargetProperty="Visibility">
-                <DiscreteObjectKeyFrame KeyTime="0:0:0.3" Value="{x:Static Visibility.Visible}"/>
-            </ObjectAnimationUsingKeyFrames>
-            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="TopMenu" Storyboard.TargetProperty="Visibility">
-                <DiscreteObjectKeyFrame KeyTime="0:0:0.3" Value="{x:Static Visibility.Collapsed}"/>
-            </ObjectAnimationUsingKeyFrames>
-        </Storyboard>
-        <Storyboard x:Key="ShowTopMenuStoryboard">
-            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="TopMenu" Storyboard.TargetProperty="Visibility">
-                <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Visible}"/>
-            </ObjectAnimationUsingKeyFrames>
-            <DoubleAnimation Storyboard.TargetName="MenuContainerGrid" Storyboard.TargetProperty="Height" To="60" Duration="0:0:0.3">
-                <DoubleAnimation.EasingFunction>
-                    <CubicEase EasingMode="EaseOut"/>
-                </DoubleAnimation.EasingFunction>
-            </DoubleAnimation>
-            <DoubleAnimation Storyboard.TargetName="TopMenu" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.2" BeginTime="0:0:0.1"/>
-            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="MenuHandle" Storyboard.TargetProperty="Visibility">
-                <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Collapsed}"/>
-            </ObjectAnimationUsingKeyFrames>
-        </Storyboard>
+        <Style x:Key="ModernTabItemStyle" TargetType="TabItem">
+            <Setter Property="Foreground" Value="#A0AEC0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Border x:Name="mainBorder" 
+                                Background="Transparent" 
+                                CornerRadius="16"
+                                Padding="12,6"
+                                Margin="4,0">
+                            <ContentPresenter ContentSource="Header" 
+                                              HorizontalAlignment="Center" 
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter TargetName="mainBorder" Property="Background" Value="#6a6a6a"/>
+                            </Trigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsMouseOver" Value="True"/>
+                                    <Condition Property="IsSelected" Value="False"/>
+                                </MultiTrigger.Conditions>
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter TargetName="mainBorder" Property="Background" Value="#4a4a4a"/>
+                            </MultiTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="TabControl">
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="ItemContainerStyle" Value="{StaticResource ModernTabItemStyle}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabControl">
+                        <UniformGrid IsItemsHost="True" 
+                                     Rows="1" 
+                                     VerticalAlignment="Center" 
+                                     HorizontalAlignment="Stretch"
+                                     Margin="15,0,0,0"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ModernContextMenuItemStyle" TargetType="MenuItem">
+            <Setter Property="Foreground" Value="#D1D5DB"/>
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="MenuItem">
+                        <Border x:Name="border" Background="Transparent" Padding="{TemplateBinding Padding}" CornerRadius="4" Margin="2">
+                            <ContentPresenter ContentSource="Header"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#374151"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ModernContextMenuStyle" TargetType="ContextMenu">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="Background" Value="#1F2937"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="4"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ContextMenu">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="8"
+                                Effect="{StaticResource ShadowEffect}">
+                            <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </UserControl.Resources>
 
-    <Border x:Name="MainBorder" SnapsToDevicePixels="True" >
+    <Border x:Name="MainBorder" SnapsToDevicePixels="True">
         <Border.Background>
             <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                <GradientStop Color="{StaticResource BackgroundColorStart}" Offset="0.0" />
-                <GradientStop Color="{StaticResource BackgroundColorEnd}" Offset="1.0" />
+                <GradientStop Color="#FFFFFF" Offset="0.0" />
+                <GradientStop Color="#F0F2F5" Offset="1.0" />
             </LinearGradientBrush>
         </Border.Background>
 
@@ -72,56 +118,81 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <Grid Grid.Row="0" Background="Aqua">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
+            <Grid Grid.Row="0">
+                <Grid x:Name="MenuContainerGrid" VerticalAlignment="Top" Height="60">
+                    <Border x:Name="TopMenu" Background="#1e1e1e" CornerRadius="21" Height="42" Margin="15,10,15,8" VerticalAlignment="Top" Effect="{StaticResource ShadowEffect}" Panel.ZIndex="99">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
 
-                <Grid x:Name="MenuContainerGrid" Grid.Column="1" VerticalAlignment="Top" Height="60">
-                    <Border x:Name="TopMenu" Background="{StaticResource TopBarBackgroundBrush}"  CornerRadius="21" Height="42" Margin="0,10,0,0" VerticalAlignment="Top" Effect="{StaticResource ShadowEffect}" Panel.ZIndex="99">
+                            <TabControl Grid.Column="0" ItemsSource="{Binding PestañasAbiertas}" SelectedItem="{Binding PestañaSeleccionada}">
+                                <TabControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
 
-                        <ItemsControl ItemsSource="{Binding Grupos}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
+                                            <TextBlock Grid.Column="0" 
+                                                       Text="{Binding page_name}" 
+                                                       VerticalAlignment="Center" 
+                                                       TextTrimming="CharacterEllipsis"
+                                                       ToolTip="{Binding page_name}"/>
 
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Button Content="{Binding group_name}"
-                    ToolTip="{Binding description}"
-                    Style="{StaticResource ModernIconButtonStyle}"
-                    Margin="10,0,0,0"
-                    Click="GroupButton_Click">
-                                        <Button.ContextMenu>
-                                            <ContextMenu ItemsSource="{Binding Paginas}">
-                                                <ContextMenu.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <MenuItem Header="{Binding page_name}"
-                                          Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                          CommandParameter="{Binding}">
-                                                            <MenuItem.Icon>
-                                                                <Path Data="{StaticResource BrowserIcon}" Fill="#1C1E21" Width="16" Height="16"/>
-                                                            </MenuItem.Icon>
-                                                        </MenuItem>
-                                                    </DataTemplate>
-                                                </ContextMenu.ItemTemplate>
-                                            </ContextMenu>
-                                        </Button.ContextMenu>
-                                    </Button>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                                            <Button Grid.Column="1"
+                                                    Background="Transparent" 
+                                                    BorderThickness="0" 
+                                                    Cursor="Hand" 
+                                                    Margin="8,0,0,0"
+                                                    Command="{Binding DataContext.CerrarPestañaCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}">
+                                                <Path Data="{StaticResource Cancel}" 
+                                                      Fill="#AAAAAA"
+                                                      Width="10" Height="10" Stretch="Uniform"/>
+                                                <Button.Style>
+                                                    <Style TargetType="Button">
+                                                        <Style.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter Property="Opacity" Value="0.7"/>
+                                                            </Trigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
+                                        </Grid>
+                                    </DataTemplate>
+                                </TabControl.ItemTemplate>
+                            </TabControl>
 
+                            <Button Grid.Column="1"
+                                    Click="OpenPagesMenu_Click"
+                                    Style="{StaticResource IconButtonStyle2}"
+                                    Margin="0,0,15,0"
+                                    Width="40" Height="40">
+                                <Path Data="{StaticResource Menu}"
+                                      Fill="White" Width="20" Height="20" Stretch="Uniform"/>
+                                <Button.ContextMenu>
+                                    <ContextMenu ItemsSource="{Binding PaginasDelGrupo}" 
+                                                 Style="{StaticResource ModernContextMenuStyle}">
+                                        <ContextMenu.ItemContainerStyle>
+                                            <Style TargetType="MenuItem" BasedOn="{StaticResource ModernContextMenuItemStyle}">
+                                                <Setter Property="Header" Value="{Binding page_name}"/>
+                                                <Setter Property="Command" Value="{Binding DataContext.AbrirPaginaCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                                                <Setter Property="CommandParameter" Value="{Binding}"/>
+                                            </Style>
+                                        </ContextMenu.ItemContainerStyle>
+                                    </ContextMenu>
+                                </Button.ContextMenu>
+                            </Button>
+                        </Grid>
                     </Border>
-                    <Border x:Name="MenuHandle" Background="#AAAAAA" Width="100" Height="8" CornerRadius="4" HorizontalAlignment="Center" VerticalAlignment="Center" Cursor="Hand" Visibility="Collapsed" MouseLeftButtonDown="MenuHandle_MouseLeftButtonDown" ToolTip="Mostrar menú"/>
                 </Grid>
             </Grid>
 
-            <Border x:Name="MainContentArea" Grid.Row="1" Background="#FFFFFF" Margin="20,0,20,20" CornerRadius="15" Effect="{DynamicResource ShadowEffect}">
+            <Border x:Name="MainContentArea" Grid.Row="1" Background="#FFFFFF" Margin="20,0,20,20" CornerRadius="15" Effect="{StaticResource ShadowEffect}">
                 <Border.Clip>
                     <RectangleGeometry RadiusX="15" RadiusY="15">
                         <RectangleGeometry.Rect>
@@ -132,7 +203,7 @@
                         </RectangleGeometry.Rect>
                     </RectangleGeometry>
                 </Border.Clip>
-                <ContentControl Content="{Binding CurrentContentViewModel}"/>
+                <ContentControl Content="{Binding CurrentBrowserView}"/>
             </Border>
         </Grid>
     </Border>

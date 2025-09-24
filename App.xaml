@@ -13,6 +13,7 @@
             </ResourceDictionary.MergedDictionaries>
 
             <converters:SizeToRectConverter x:Key="SizeToRectConverter"/>
+            <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
 
         </ResourceDictionary>
 

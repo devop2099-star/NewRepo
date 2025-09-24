@@ -72,9 +72,9 @@ public class FilterPagesViewModel : ObservableObject
 
     private async Task SavePageAsync()
     {
-        if (string.IsNullOrWhiteSpace(PageName) || string.IsNullOrWhiteSpace(PageUrl))
+        if (string.IsNullOrWhiteSpace(PageName) || string.IsNullOrWhiteSpace(PageDescription) || string.IsNullOrWhiteSpace(PageUrl))
         {
-            MessageBox.Show("El nombre y la URL de la página son obligatorios.", "Error de Validación");
+            MessageBox.Show("El Nombre, la Descripción y la URL de la página son obligatorios.", "Error de Validación");
             return;
         }
 
@@ -115,9 +115,9 @@ public class FilterPagesViewModel : ObservableObject
 
     private async Task CreateGroupAsync()
     {
-        if (string.IsNullOrWhiteSpace(GroupName))
+        if (string.IsNullOrWhiteSpace(GroupName) || string.IsNullOrWhiteSpace(GroupDescription))
         {
-            MessageBox.Show("El nombre del grupo es obligatorio.", "Error de Validación");
+            MessageBox.Show("El Nombre y la Descripción del grupo son obligatorios.", "Error de Validación");
             return;
         }
 
