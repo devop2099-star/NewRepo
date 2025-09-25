@@ -14,6 +14,8 @@
 
             <converters:SizeToRectConverter x:Key="SizeToRectConverter"/>
             <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+            <converters:BooleanToVisibilityConverter x:Key="InvertedBooleanToVisibilityConverter" Invert="True"/>
+
 
         </ResourceDictionary>
 

@@ -9,4 +9,5 @@ public class Group
     public short pin { get; set; }
 
     public ObservableCollection<Pagina> Paginas { get; set; } = new ObservableCollection<Pagina>();
+    public HashSet<long> PinnedPageIds { get; set; } = new();
 }

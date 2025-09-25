@@ -13,6 +13,7 @@ namespace Naviguard.Models
         public bool requires_login { get; set; }
         public DateTime created_at { get; set; }
         public short state { get; set; }
+        public short pin_in_group { get; set; }
 
         public string PageName => page_name;
     }

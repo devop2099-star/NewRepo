@@ -1,39 +1,12 @@
 ﻿using Npgsql;
 using Naviguard.Connections;
 using Naviguard.Models;
+using System.Diagnostics;
 
 namespace Naviguard.Repositories
 {
     public class PaginaRepository
     {
-        public List<Pagina> ObtenerPaginas() 
-        {
-            var paginas = new List<Pagina>(); 
-            using (var conn = ConexionBD.ObtenerConexionNaviguard())
-            {
-                conn.Open();
-                var sql = "SELECT page_id, page_name, url, description, requires_proxy, requires_login, created_at, state FROM browser_app.pages ORDER BY page_name";
-                using (var cmd = new NpgsqlCommand(sql, conn))
-                using (var reader = cmd.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        paginas.Add(new Pagina 
-                        {
-                            page_id = Convert.ToInt64(reader["page_id"]),
-                            page_name = reader["page_name"].ToString(),
-                            url = reader["url"].ToString(),
-                            description = reader["description"].ToString(),
-                            requires_proxy = Convert.ToBoolean(reader["requires_proxy"]),
-                            requires_login = Convert.ToBoolean(reader["requires_login"]),
-                            created_at = Convert.ToDateTime(reader["created_at"]),
-                            state = Convert.ToInt16(reader["state"])
-                        });
-                    }
-                }
-            }
-            return paginas;
-        }
         public async Task<long> AddPageAsync(Pagina newPage)
         {
             using (var conn = ConexionBD.ObtenerConexionNaviguard())
@@ -129,6 +102,126 @@ namespace Naviguard.Repositories
                         cmd.Parameters.AddWithValue("@state", 1);
                         await cmd.ExecuteNonQueryAsync();
                     }
+                }
+            }
+        }
+        public async Task UpdatePageAsync(Pagina page)
+        {
+            using (var conn = ConexionBD.ObtenerConexionNaviguard())
+            {
+                await conn.OpenAsync();
+                // Se quita "pin = @pin" de la consulta
+                var sql = @"UPDATE browser_app.pages SET
+                        page_name = @page_name,
+                        description = @description,
+                        url = @url,
+                        requires_proxy = @requires_proxy,
+                        requires_login = @requires_login
+                    WHERE page_id = @page_id";
+                using (var cmd = new NpgsqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@page_name", page.page_name);
+                    cmd.Parameters.AddWithValue("@description", (object)page.description ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@url", page.url);
+                    cmd.Parameters.AddWithValue("@requires_proxy", page.requires_proxy);
+                    cmd.Parameters.AddWithValue("@requires_login", page.requires_login);
+                    // Se quita el parámetro @pin
+                    cmd.Parameters.AddWithValue("@page_id", page.page_id);
+                    await cmd.ExecuteNonQueryAsync();
+                }
+            }
+        }
+
+        public List<Pagina> ObtenerPaginas()
+        {
+            var paginas = new List<Pagina>();
+            using (var conn = ConexionBD.ObtenerConexionNaviguard())
+            {
+                conn.Open();
+                // Se quita "pin" del SELECT y del ORDER BY
+                var sql = "SELECT page_id, page_name, url, description, requires_proxy, requires_login, created_at, state FROM browser_app.pages ORDER BY page_name";
+                using (var cmd = new NpgsqlCommand(sql, conn))
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        paginas.Add(new Pagina
+                        {
+                            page_id = Convert.ToInt64(reader["page_id"]),
+                            page_name = reader["page_name"].ToString(),
+                            url = reader["url"].ToString(),
+                            description = reader["description"].ToString(),
+                            requires_proxy = Convert.ToBoolean(reader["requires_proxy"]),
+                            requires_login = Convert.ToBoolean(reader["requires_login"]),
+                            created_at = Convert.ToDateTime(reader["created_at"]),
+                            state = Convert.ToInt16(reader["state"]),
+                            // Se quita la asignación de "pin"
+                        });
+                    }
+                }
+            }
+            return paginas;
+        }
+
+        public async Task<PageCredential> GetCredentialForPageAsync(long pageId)
+        {
+            Debug.WriteLine($"--- [REPOSITORIO] Buscando credenciales para PageID: {pageId} ---");
+            PageCredential credential = null;
+
+            using (var conn = ConexionBD.ObtenerConexionNaviguard())
+            {
+                await conn.OpenAsync();
+                var sql = "SELECT username, password FROM browser_app.page_credentials WHERE page_id = @page_id AND state = 1 LIMIT 1";
+
+                using (var cmd = new NpgsqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@page_id", pageId);
+                    using (var reader = await cmd.ExecuteReaderAsync())
+                    {
+                        if (await reader.ReadAsync())
+                        {
+                            Debug.WriteLine("[REPOSITORIO] ¡Éxito! Se encontró una credencial en la base de datos.");
+                            string dbUsername = reader["username"].ToString();
+                            string dbPassword = reader["password"].ToString();
+                            Debug.WriteLine($"[REPOSITORIO] -> Username de BD: '{dbUsername}', Password de BD: '{dbPassword}'");
+
+                            credential = new PageCredential
+                            {
+                                Username = dbUsername,
+                                Password = dbPassword
+                            };
+                        }
+                        else
+                        {
+                            Debug.WriteLine("[REPOSITORIO] AVISO: La consulta no devolvió filas. No se encontró ninguna credencial para este PageID.");
+                        }
+                    }
+                }
+            }
+
+            Debug.WriteLine($"--- [REPOSITORIO] El método retornará {(credential == null ? "NULL" : "un objeto PageCredential")} ---");
+            return credential;
+        }
+
+        public async Task UpdateOrInsertCredentialAsync(long pageId, string username, string password)
+        {
+            using (var conn = ConexionBD.ObtenerConexionNaviguard())
+            {
+                await conn.OpenAsync();
+                var sql = @"
+                    INSERT INTO browser_app.page_credentials (page_id, username, password, created_at, state)
+                    VALUES (@page_id, @username, @password, @created_at, 1)
+                    ON CONFLICT (page_id) DO UPDATE SET
+                        username = EXCLUDED.username,
+                        password = EXCLUDED.password;";
+
+                using (var cmd = new NpgsqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@page_id", pageId);
+                    cmd.Parameters.AddWithValue("@username", (object)username ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@password", (object)password ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@created_at", DateTime.UtcNow);
+                    await cmd.ExecuteNonQueryAsync();
                 }
             }
         }

@@ -39,9 +39,17 @@ namespace Naviguard.ViewModels
             var paginas = _grupoRepository.ObtenerPaginasPorGrupo(_groupId);
             Debug.WriteLine($"[MenuNaviguardViewModel] Se encontraron {paginas.Count} páginas para el Group ID: {_groupId}");
 
+            PaginasDelGrupo.Clear();
             foreach (var p in paginas)
             {
                 PaginasDelGrupo.Add(p);
+            }
+
+            Debug.WriteLine("[MenuNaviguardViewModel] Buscando páginas fijadas para abrir automáticamente...");
+            foreach (var paginaFijada in paginas.Where(p => p.pin_in_group == 1))
+            {
+                Debug.WriteLine($" -> Abriendo página fijada: '{paginaFijada.page_name}'");
+                AbrirPagina(paginaFijada);
             }
         }
 
