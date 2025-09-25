@@ -225,5 +225,18 @@ namespace Naviguard.Repositories
                 }
             }
         }
+        public async Task SoftDeletePageAsync(long pageId)
+        {
+            using (var conn = ConexionBD.ObtenerConexionNaviguard())
+            {
+                await conn.OpenAsync();
+                var sql = "UPDATE browser_app.pages SET state = 0 WHERE page_id = @page_id";
+                using (var cmd = new NpgsqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@page_id", pageId);
+                    await cmd.ExecuteNonQueryAsync();
+                }
+            }
+        }
     }
 }

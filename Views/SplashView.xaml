@@ -17,9 +17,9 @@
             Opacity="1">
             <TextBlock x:Name="TxtCargando"
                    Text="CARGANDO"
-                   FontSize="64"
+                   FontSize="25"
                    FontWeight="Bold"
-                   Foreground="Black"
+                   Foreground="#3d3d3d"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center"
                    TextOptions.TextRenderingMode="ClearType"

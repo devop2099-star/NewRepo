@@ -6,7 +6,7 @@ namespace Naviguard.Repositories
 {
     public class PageCredentialRepository
     {
-        public PageCredential? ObtenerCredencialPorPagina(long pageId)
+        public async Task<PageCredential?> ObtenerCredencialPorPaginaAsync(long pageId)
         {
             using var conn = ConexionBD.ObtenerConexionNaviguard();
             conn.Open();

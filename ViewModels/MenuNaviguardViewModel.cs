@@ -23,6 +23,8 @@ namespace Naviguard.ViewModels
 
         private readonly GrupoRepository _grupoRepository;
         private readonly long _groupId;
+        private readonly Dictionary<Pagina, BrowserView> _activeBrowserViews = new();
+        private readonly Stack<BrowserView> _browserViewPool = new();
 
         public MenuNaviguardViewModel(long groupId)
         {
@@ -74,14 +76,46 @@ namespace Naviguard.ViewModels
         private void CerrarPestaña(Pagina pagina)
         {
             if (pagina == null) return;
+
+            if (_activeBrowserViews.TryGetValue(pagina, out var viewToPool))
+            {
+                _browserViewPool.Push(viewToPool);
+
+                _activeBrowserViews.Remove(pagina);
+
+                Debug.WriteLine($"[ViewModel] Pestaña '{pagina.page_name}' cerrada. BrowserView guardada en el pool. (Pool size: {_browserViewPool.Count})");
+            }
+
             PestañasAbiertas.Remove(pagina);
         }
 
-        partial void OnPestañaSeleccionadaChanged(Pagina value)
+        async partial void OnPestañaSeleccionadaChanged(Pagina value)
         {
             if (value != null)
             {
-                var browserView = new BrowserView();
+                Debug.WriteLine($"[ViewModel] Pestaña seleccionada: '{value.page_name}'");
+
+                if (_activeBrowserViews.TryGetValue(value, out var existingView))
+                {
+                    CurrentBrowserView = existingView;
+                    Debug.WriteLine("-> Mostrando BrowserView ya existente.");
+                    return;
+                }
+
+                BrowserView browserView;
+                if (_browserViewPool.Count > 0)
+                {
+                    browserView = _browserViewPool.Pop();
+                    Debug.WriteLine("-> Reutilizando BrowserView desde el pool.");
+                }
+                else
+                {
+                    browserView = new BrowserView();
+                    Debug.WriteLine("-> Creando una nueva BrowserView.");
+                }
+
+                _activeBrowserViews[value] = browserView;
+
                 ProxyInfo? proxyInfo = null;
                 if (value.requires_proxy)
                 {
@@ -89,13 +123,14 @@ namespace Naviguard.ViewModels
                     proxyInfo = proxyManager.GetProxy();
                 }
 
-                browserView.LoadPage(value, proxyInfo);
+                await browserView.LoadPage(value, proxyInfo);
 
                 CurrentBrowserView = browserView;
             }
             else
             {
                 CurrentBrowserView = null;
+                Debug.WriteLine("[ViewModel] No hay ninguna pestaña seleccionada.");
             }
         }
 

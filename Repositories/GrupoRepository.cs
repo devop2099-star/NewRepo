@@ -19,7 +19,7 @@ namespace Naviguard.Repositories
                 FROM browser_app.pages p
                 INNER JOIN browser_app.group_pages gp ON p.page_id = gp.page_id
                 WHERE gp.group_id = @group_id AND p.state = 1
-                ORDER BY gp.pin DESC, p.page_name;"; 
+                ORDER BY gp.pin DESC, p.page_name;";
 
                 using (var cmd = new NpgsqlCommand(sql, conn))
                 {
@@ -67,7 +67,7 @@ namespace Naviguard.Repositories
                             group_id = Convert.ToInt64(reader["group_id"]),
                             group_name = reader["group_name"].ToString(),
                             description = reader["description"]?.ToString(),
-                            pin = reader["pin"] == DBNull.Value ? (short)0 : Convert.ToInt16(reader["pin"]) 
+                            pin = reader["pin"] == DBNull.Value ? (short)0 : Convert.ToInt16(reader["pin"])
                         });
                     }
                 }
@@ -106,7 +106,7 @@ namespace Naviguard.Repositories
                                 description = reader["description"]?.ToString(),
                                 pin = reader["pin"] == DBNull.Value ? (short)0 : Convert.ToInt16(reader["pin"]),
                                 Paginas = new ObservableCollection<Pagina>(),
-                                PinnedPageIds = new HashSet<long>() 
+                                PinnedPageIds = new HashSet<long>()
                             };
                         }
 
@@ -132,7 +132,7 @@ namespace Naviguard.Repositories
             }
             return grupos.Values.ToList();
         }
-             
+
         public async Task UpdateGroupAsync(Group groupToUpdate, List<PageAssignmentInfo> pagesToAssign)
         {
             Debug.WriteLine("--- [REPOSITORIO] Entrando a UpdateGroupAsync ---");
@@ -199,10 +199,19 @@ namespace Naviguard.Repositories
                 }
             }
         }
-    
-    
-    
-    
+        public async Task SoftDeleteGroupAsync(long groupId)
+        {
+            using (var conn = ConexionBD.ObtenerConexionNaviguard())
+            {
+                await conn.OpenAsync();
+                var sql = "UPDATE browser_app.page_groups SET state = 0 WHERE group_id = @group_id";
+                using (var cmd = new NpgsqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@group_id", groupId);
+                    await cmd.ExecuteNonQueryAsync();
+                }
+            }
+        }
     }
 }
 

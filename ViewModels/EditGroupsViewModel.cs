@@ -53,6 +53,9 @@ namespace Naviguard.ViewModels
 
         [ObservableProperty] private ObservableCollection<SelectablePageViewModel> _allPagesChecklist;
         public IRelayCommand<SelectablePageViewModel> TogglePinPageInGroupCommand { get; }
+       
+        public IAsyncRelayCommand<Group> DeleteGroupCommand { get; }
+        public IAsyncRelayCommand<Pagina> DeletePageCommand { get; }
 
         public EditGroupsViewModel()
         {
@@ -68,7 +71,75 @@ namespace Naviguard.ViewModels
             UpdateGroupCommand = new AsyncRelayCommand(UpdateGroupAsync, () => IsGroupSelected);
             UpdatePageCommand = new AsyncRelayCommand(UpdatePageAsync, () => IsPageSelected);
 
+            DeleteGroupCommand = new AsyncRelayCommand<Group>(DeleteGroup);
+            DeletePageCommand = new AsyncRelayCommand<Pagina>(DeletePage);
+
             LoadGroupData();
+        }
+
+        private async Task DeleteGroup(Group groupToDelete)
+        {
+            if (groupToDelete == null) return;
+
+            var result = MessageBox.Show($"¿Estás seguro de que quieres eliminar el grupo '{groupToDelete.group_name}'?",
+                                         "Confirmar Eliminación",
+                                         MessageBoxButton.YesNo,
+                                         MessageBoxImage.Warning);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                try
+                {
+                    await _grupoRepository.SoftDeleteGroupAsync(groupToDelete.group_id);
+
+                    // Eliminar de las listas en la UI para una actualización instantánea
+                    AllGroups.Remove(groupToDelete);
+                    FilteredGroups.Remove(groupToDelete);
+
+                    if (SelectedGroup == groupToDelete)
+                    {
+                        SelectedGroup = null; // Limpiar el panel de edición si el grupo eliminado estaba seleccionado
+                    }
+
+                    MessageBox.Show("Grupo eliminado correctamente.", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error al eliminar el grupo: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private async Task DeletePage(Pagina pageToDelete)
+        {
+            if (pageToDelete == null) return;
+
+            var result = MessageBox.Show($"¿Estás seguro de que quieres eliminar la página '{pageToDelete.page_name}'?",
+                                         "Confirmar Eliminación",
+                                         MessageBoxButton.YesNo,
+                                         MessageBoxImage.Warning);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                try
+                {
+                    await _paginaRepository.SoftDeletePageAsync(pageToDelete.page_id);
+
+                    AllPages.Remove(pageToDelete);
+                    FilteredPages.Remove(pageToDelete);
+
+                    if (SelectedPage == pageToDelete)
+                    {
+                        SelectedPage = null; // Limpiar el panel de edición
+                    }
+
+                    MessageBox.Show("Página eliminada correctamente.", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error al eliminar la página: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
         }
 
         partial void OnIsEditingPagesChanged(bool value)
@@ -291,6 +362,7 @@ namespace Naviguard.ViewModels
                 MessageBox.Show($"Error al actualizar la página: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
         private void LoadInitialData()
         {
             var groups = _grupoRepository.ObtenerGruposConPaginas();

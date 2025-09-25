@@ -38,10 +38,20 @@
                     <DockPanel>
                         <TextBlock DockPanel.Dock="Top" Text="Grupos Existentes" FontSize="18" FontWeight="Bold" Foreground="#1C1E21" Margin="0,5,0,10"/>
                         <TextBox DockPanel.Dock="Top" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" Tag="Buscar grupo..." Style="{StaticResource RoundedTextBoxStyle}" Padding="5" Margin="0,0,0,10"/>
-                        <ListBox ItemsSource="{Binding FilteredGroups}" SelectedItem="{Binding SelectedGroup}" BorderThickness="0" HorizontalContentAlignment="Stretch">
+
+                        <ListBox x:Name="GroupsListBox" ItemsSource="{Binding FilteredGroups}" SelectedItem="{Binding SelectedGroup}" BorderThickness="0" HorizontalContentAlignment="Stretch">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding group_name}" Padding="8,5" FontSize="14"/>
+                                    <Border Background="Transparent" Tag="{Binding DataContext, ElementName=GroupsListBox}">
+                                        <Border.ContextMenu>
+                                            <ContextMenu>
+                                                <MenuItem Header="Eliminar Grupo" 
+                                                          Command="{Binding PlacementTarget.Tag.DeleteGroupCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                          CommandParameter="{Binding}"/>
+                                            </ContextMenu>
+                                        </Border.ContextMenu>
+                                        <TextBlock Text="{Binding group_name}" Padding="8,5" FontSize="14"/>
+                                    </Border>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
@@ -52,10 +62,20 @@
                     <DockPanel>
                         <TextBlock DockPanel.Dock="Top" Text="Páginas Existentes" FontSize="18" FontWeight="Bold" Foreground="#1C1E21" Margin="0,5,0,10"/>
                         <TextBox DockPanel.Dock="Top" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" Tag="Buscar página..." Style="{StaticResource RoundedTextBoxStyle}" Padding="5" Margin="0,0,0,10"/>
-                        <ListBox ItemsSource="{Binding FilteredPages}" SelectedItem="{Binding SelectedPage}" BorderThickness="0" HorizontalContentAlignment="Stretch">
+
+                        <ListBox x:Name="PagesListBox" ItemsSource="{Binding FilteredPages}" SelectedItem="{Binding SelectedPage}" BorderThickness="0" HorizontalContentAlignment="Stretch">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding page_name}" Padding="8,5" FontSize="14"/>
+                                    <Border Background="Transparent" Tag="{Binding DataContext, ElementName=PagesListBox}">
+                                        <Border.ContextMenu>
+                                            <ContextMenu>
+                                                <MenuItem Header="Eliminar Página"
+                                                          Command="{Binding PlacementTarget.Tag.DeletePageCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                          CommandParameter="{Binding}"/>
+                                            </ContextMenu>
+                                        </Border.ContextMenu>
+                                        <TextBlock Text="{Binding page_name}" Padding="8,5" FontSize="14"/>
+                                    </Border>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>

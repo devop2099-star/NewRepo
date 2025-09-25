@@ -8,6 +8,7 @@ namespace Naviguard.Views
     {
         private FilterPagesNav _filterPagesNav;
         private EditGroups _editGroups;
+        private AssignUserToGroups _assignUserToGroups;
 
         public MenuMain()
         {
@@ -64,5 +65,15 @@ namespace Naviguard.Views
             }
             ContentPresenter.Content = _editGroups;
         }
+        private void btnAssignUserToGroups_Click(object sender, RoutedEventArgs e)
+        {
+            if (_assignUserToGroups == null)
+            {
+                _assignUserToGroups = new AssignUserToGroups();
+            }
+            ContentPresenter.Content = _assignUserToGroups;
+        }
+
+        
     }
 }
