@@ -4,8 +4,8 @@
     <DropShadowEffect x:Key="ShadowEffect" Color="#333" BlurRadius="10" ShadowDepth="3" Opacity="0.3"/>
     <DropShadowEffect x:Key="LightShadow" Color="#000" BlurRadius="5" ShadowDepth="2" Opacity="0.15"/>
     <DropShadowEffect x:Key="HeavyShadow" Color="#000" BlurRadius="15" ShadowDepth="6" Opacity="0.4"/>
-
     <SolidColorBrush x:Key="ButtonHoverBrush" Color="#3FFFFFFF"/>
+    
     <Style x:Key="IconButtonStyle2" TargetType="Button">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>
@@ -191,7 +191,6 @@
         </Style.Triggers>
     </Style>
 
-
     <Style x:Key="ToggleSwitchStyle" TargetType="CheckBox">
         <Setter Property="Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Control}}"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
@@ -309,6 +308,4 @@
             </Setter.Value>
         </Setter>
     </Style>
-
-    
 </ResourceDictionary>

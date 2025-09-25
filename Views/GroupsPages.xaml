@@ -53,6 +53,24 @@
                                     </ContextMenu>
                                 </Button.ContextMenu>
                             </Button>
+                            <Path Data="{StaticResource pinned}" 
+                                  Fill="#3B82F6" 
+                                  Width="16" Height="16" 
+                                  Stretch="Uniform"
+                                  HorizontalAlignment="Right" 
+                                  VerticalAlignment="Top" 
+                                  Margin="15">
+                                <Path.Style>
+                                    <Style TargetType="Path">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding pin}" Value="1">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Path.Style>
+                            </Path>
                         </Grid>
                     </Button>
                 </DataTemplate>

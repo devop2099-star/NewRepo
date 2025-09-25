@@ -49,12 +49,11 @@ namespace Naviguard.Repositories
             using (var conn = ConexionBD.ObtenerConexionNaviguard())
             {
                 conn.Open();
-                // Esta consulta es más simple: no une con las páginas
                 var sql = @"
-            SELECT group_id, group_name, description 
-            FROM browser_app.page_groups 
-            WHERE state = 1 
-            ORDER BY group_name;";
+                    SELECT group_id, group_name, description, pin 
+                    FROM browser_app.page_groups 
+                    WHERE state = 1 
+                    ORDER BY pin DESC, group_name;";
 
                 using (var cmd = new NpgsqlCommand(sql, conn))
                 using (var reader = cmd.ExecuteReader())
@@ -64,8 +63,9 @@ namespace Naviguard.Repositories
                         grupos.Add(new Group
                         {
                             group_id = Convert.ToInt64(reader["group_id"]),
-                            group_name = reader["group_name"].ToString()!,
-                            description = reader["description"]?.ToString()
+                            group_name = reader["group_name"].ToString(),
+                            description = reader["description"]?.ToString(),
+                            pin = reader["pin"] == DBNull.Value ? (short)0 : Convert.ToInt16(reader["pin"]) 
                         });
                     }
                 }
@@ -80,16 +80,15 @@ namespace Naviguard.Repositories
             {
                 conn.Open();
                 var sql = @"
-            SELECT pg.group_id, pg.group_name, pg.description, pg.pin,
-                   p.page_id, p.page_name, p.url, p.requires_proxy, p.requires_login
-            FROM browser_app.page_groups pg
-            LEFT JOIN browser_app.group_pages gp ON pg.group_id = gp.group_id
-            LEFT JOIN browser_app.pages p ON gp.page_id = p.page_id
-            WHERE pg.state = 1 AND (p.state = 1 OR p.page_id IS NULL)
-            ORDER BY pg.pin DESC, pg.group_name, p.page_name;";
+                    SELECT pg.group_id, pg.group_name, pg.description, pg.pin,
+                           p.page_id, p.page_name, p.url, p.requires_proxy, p.requires_login
+                    FROM browser_app.page_groups pg
+                    LEFT JOIN browser_app.group_pages gp ON pg.group_id = gp.group_id
+                    LEFT JOIN browser_app.pages p ON gp.page_id = p.page_id
+                    WHERE pg.state = 1 AND (p.state = 1 OR p.page_id IS NULL)
+                    ORDER BY pg.pin DESC, pg.group_name, p.page_name;";
 
                 using (var cmd = new NpgsqlCommand(sql, conn))
-
                 using (var reader = cmd.ExecuteReader())
                 {
                     while (reader.Read())
@@ -102,21 +101,22 @@ namespace Naviguard.Repositories
                                 group_id = groupId,
                                 group_name = reader["group_name"].ToString(),
                                 description = reader["description"]?.ToString(),
-                                pin = reader["pin"] == DBNull.Value ? (short)0 : Convert.ToInt16(reader["pin"]), 
+                                pin = reader["pin"] == DBNull.Value ? (short)0 : Convert.ToInt16(reader["pin"]),
                                 Paginas = new ObservableCollection<Pagina>()
                             };
                         }
 
                         if (reader["page_id"] != DBNull.Value)
                         {
-                            grupos[groupId].Paginas.Add(new Pagina
+                            var pagina = new Pagina
                             {
                                 page_id = Convert.ToInt64(reader["page_id"]),
                                 page_name = reader["page_name"].ToString(),
                                 url = reader["url"].ToString(),
                                 requires_proxy = Convert.ToBoolean(reader["requires_proxy"]),
                                 requires_login = Convert.ToBoolean(reader["requires_login"])
-                            });
+                            };
+                            grupos[groupId].Paginas.Add(pagina);
                         }
                     }
                 }
