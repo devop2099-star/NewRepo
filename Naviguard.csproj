@@ -22,6 +22,7 @@
     <PackageReference Include="CefSharp.Wpf.NETCore" Version="139.0.280" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.0-rc.1.25451.107" />
+    <PackageReference Include="MySqlConnector" Version="2.4.0" />
     <PackageReference Include="Npgsql" Version="9.0.3" />
   </ItemGroup>
 
@@ -29,6 +30,10 @@
     <None Update="Connections\appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="BusinessInfo\ViewModels\" />
   </ItemGroup>
 
 </Project>

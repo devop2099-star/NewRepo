@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using MySqlConnector;
 using Npgsql;
 using System.Windows;
 
@@ -31,6 +32,16 @@ namespace Naviguard.Connections
                 throw new InvalidOperationException("La cadena de conexión 'naviguard' no se encontró en appsettings.json.");
             }
             return new NpgsqlConnection(connStr);
+        }
+
+        public static MySqlConnection ObtenerConexionNxEcosystem()
+        {
+            string connStr = _config.GetConnectionString("BD_NexusEcosystem");
+            if (string.IsNullOrEmpty(connStr))
+            {
+                throw new InvalidOperationException("La cadena de conexión 'BD_NexusEcosystem' no se encontró en appsettings.json.");
+            }
+            return new MySqlConnection(connStr);
         }
     }
 }

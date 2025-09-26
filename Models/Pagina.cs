@@ -1,7 +1,4 @@
-﻿// Naviguard/Models/Pagina.cs
-using System;
-
-namespace Naviguard.Models
+﻿namespace Naviguard.Models
 {
     public class Pagina
     {

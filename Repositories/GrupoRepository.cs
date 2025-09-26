@@ -144,7 +144,6 @@ namespace Naviguard.Repositories
                 {
                     try
                     {
-                        // PASO 1: Actualizar la tabla principal 'page_groups'
                         var updateGroupSql = @"
                     UPDATE browser_app.page_groups
                     SET group_name = @group_name, description = @description, pin = @pin
@@ -160,7 +159,6 @@ namespace Naviguard.Repositories
                             await cmdUpdate.ExecuteNonQueryAsync();
                         }
 
-                        // PASO 2: Borrar las asignaciones de páginas antiguas para este grupo
                         Debug.WriteLine($"[REPOSITORIO] 2. Borrando todas las asignaciones de páginas para el grupo ID: {groupToUpdate.group_id}");
                         var deletePagesSql = "DELETE FROM browser_app.group_pages WHERE group_id = @group_id;";
                         using (var cmdDelete = new NpgsqlCommand(deletePagesSql, conn, transaction))
@@ -169,7 +167,6 @@ namespace Naviguard.Repositories
                             await cmdDelete.ExecuteNonQueryAsync();
                         }
 
-                        // PASO 3: Insertar las nuevas asignaciones, AHORA INCLUYENDO EL PIN
                         if (pagesToAssign.Any())
                         {
                             Debug.WriteLine($"[REPOSITORIO] 3. Re-insertando {pagesToAssign.Count} páginas...");

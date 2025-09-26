@@ -3,6 +3,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using Naviguard.Connections;
+using Naviguard.Repositories;
 using Naviguard.Views; 
 
 namespace Naviguard.Login
@@ -10,6 +11,7 @@ namespace Naviguard.Login
     public partial class Login : Window
     {
         private readonly ApiClient _apiClient = new ApiClient();
+        private readonly AuthRepository _authRepository = new AuthRepository();
 
         public Login()
         {
@@ -71,9 +73,23 @@ namespace Naviguard.Login
 
             if (loginExitoso)
             {
-                var menu = new MenuMain();
-                menu.Show();
-                this.Close();
+                try
+                {
+
+                    long userId = UserSession.ApiUserId;
+
+                    bool userHasAdminAccess = await _authRepository.UserHasRolesAsync(userId);
+
+                    var menu = new MenuMain(userHasAdminAccess);
+                    menu.Show();
+                    this.Close();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ocurrió un error al verificar sus permisos: {ex.Message}", "Error de Autorización");
+                    UserSession.EndSession(); 
+                    btnLogin.IsEnabled = true;
+                }
             }
             else
             {

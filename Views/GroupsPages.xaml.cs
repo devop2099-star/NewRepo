@@ -1,5 +1,4 @@
-﻿using Naviguard.Models; // <-- Añadir este using para acceder al modelo 'Group'
-using System.Diagnostics; // <-- Añadir este using para Debug.WriteLine
+﻿using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 

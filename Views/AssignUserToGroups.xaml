@@ -4,24 +4,29 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Naviguard.Views"
+             xmlns:vm="clr-namespace:Naviguard.BusinessInfo.ViewModels"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="900"
              Background="Transparent">
 
+    <UserControl.DataContext>
+        <vm:AssignUserToGroupsViewModel/>
+    </UserControl.DataContext>
+
     <Grid Margin="15">
         <Grid.RowDefinitions>
-            <RowDefinition Height="0.3*"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="20"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Primer Border en la primera fila con filtros -->
-        <Border Grid.Row="0" Background="White" CornerRadius="30" Padding="20" Effect="{DynamicResource ShadowEffect}">
+        <Border Grid.Row="0" Background="White" CornerRadius="30" Padding="25" Effect="{DynamicResource ShadowEffect}">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2*"/>
-                    <ColumnDefinition Width="2*"/>
-                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
@@ -29,42 +34,141 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <!-- Nombre -->
                 <TextBlock Text="Nombre:" FontSize="14" FontWeight="Bold" Grid.Row="0" Grid.Column="0" Margin="0,0,0,5"/>
-                <TextBox Grid.Row="1" Grid.Column="0" Width="200" Height="30" Margin="0,0,10,0" Style="{StaticResource RoundedTextBoxStyle}"/>
+                <TextBox Text="{Binding FilterName, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="0" Height="30" Margin="0,0,10,0" Style="{StaticResource RoundedTextBoxStyle}"/>
 
-                <!-- Área -->
-                <TextBlock Text="Área:" FontSize="14" FontWeight="Bold" Grid.Row="0" Grid.Column="1" Margin="0,0,0,5"/>
-                <ComboBox Grid.Row="1" Grid.Column="1" Width="200" Height="30" Margin="0,0,10,0">
-                    <ComboBoxItem Content="Selecciona área" IsSelected="True"/>
-                </ComboBox>
+                <TextBlock Text="Departamento:" FontSize="14" FontWeight="Bold" Grid.Row="0" Grid.Column="1" Margin="0,0,0,5"/>
+                <ComboBox Grid.Row="1" Grid.Column="1" Height="30" Margin="0,0,10,0"
+                          ItemsSource="{Binding Departments}"
+                          SelectedItem="{Binding SelectedDepartment, Mode=TwoWay}"
+                          DisplayMemberPath="name_department" 
+                          ToolTip="Selecciona un departamento"/>
 
-                <!-- Categoría -->
-                <TextBlock Text="Categoría:" FontSize="14" FontWeight="Bold" Grid.Row="0" Grid.Column="2" Margin="0,0,0,5"/>
-                <ComboBox Grid.Row="1" Grid.Column="2" Width="200" Height="30" Margin="0,0,10,0">
-                    <ComboBoxItem Content="Selecciona categoría" IsSelected="True"/>
-                </ComboBox>
+                <TextBlock Text="Área:" FontSize="14" FontWeight="Bold" Grid.Row="0" Grid.Column="2" Margin="0,0,0,5"/>
+                <ComboBox Grid.Row="1" Grid.Column="2" Height="30" Margin="0,0,10,0"
+                          ItemsSource="{Binding Areas}"
+                          SelectedItem="{Binding SelectedArea, Mode=TwoWay}"
+                          DisplayMemberPath="name_area"
+                          IsEnabled="{Binding SelectedDepartment, TargetNullValue=False}"
+                          ToolTip="Selecciona un área"/>
 
-                <!-- Botón Filtrar -->
-                <Button Grid.Row="1" Grid.Column="3" Width="100" Height="30" Content="Filtrar"
-                         Style="{StaticResource PrimaryButtonStyle}"/>
+                <TextBlock Text="Subárea:" FontSize="14" FontWeight="Bold" Grid.Row="0" Grid.Column="3" Margin="0,0,0,5"/>
+                <ComboBox Grid.Row="1" Grid.Column="3" Height="30" Margin="0,0,10,0"
+                          ItemsSource="{Binding Subareas}"
+                          SelectedItem="{Binding SelectedSubarea, Mode=TwoWay}"
+                          DisplayMemberPath="name_subarea"
+                          IsEnabled="{Binding SelectedArea, TargetNullValue=False}"
+                          ToolTip="Selecciona una subárea"/>
+
+                <StackPanel Grid.Row="1" Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Command="{Binding FilterCommand}" Width="30" Height="30" Style="{StaticResource FiltroButtonStyle}" Margin="0,0,15,5"/>
+
+                    <Button Command="{Binding ClearFilterCommand}" Width="30" Height="30" Style="{StaticResource BorrarFiltroButtonStyle}" Margin="0,0,15,5"/>
+                </StackPanel>
             </Grid>
         </Border>
 
-        <!-- Segunda fila con dos columnas -->
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="0.6*"/>
                 <ColumnDefinition Width="10"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Border en la primera columna -->
             <Border Grid.Column="0" Background="White" CornerRadius="30" Padding="20" Effect="{DynamicResource ShadowEffect}">
-            </Border>
+                <ScrollViewer VerticalScrollBarVisibility="Hidden">
+                    <ListBox ItemsSource="{Binding FilteredUsers}" 
+                             SelectedItem="{Binding SelectedUser, Mode=TwoWay}"
+                             Background="Transparent" BorderThickness="0"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
 
-            <!-- Border en la segunda columna -->
-            <Border Grid.Column="2" Background="White" CornerRadius="30" Padding="20" Effect="{DynamicResource ShadowEffect}">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="Padding" Value="0"/>
+                                <Setter Property="Margin" Value="0,0,0,8"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListBoxItem">
+                                            <ContentPresenter/>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="#F0F2F5" CornerRadius="15" Padding="12,8" Cursor="Hand">
+                                    <TextBlock Text="{Binding full_name}" FontWeight="SemiBold" Foreground="#1C1E21"/>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </ScrollViewer>
+            </Border>
+            <Border Grid.Column="2" Background="White" CornerRadius="30" Padding="25" Effect="{DynamicResource ShadowEffect}">
+                <Grid Visibility="{Binding IsUserSelected, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <ScrollViewer VerticalScrollBarVisibility="Hidden">
+                        <StackPanel>
+                            <TextBlock FontSize="18" FontWeight="Bold" Foreground="#1C1E21">
+                                <TextBlock.Text>
+                                    <MultiBinding StringFormat="Asignar grupos a &quot;{0}&quot;">
+                                        <Binding Path="SelectedUser.full_name"/>
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+                            <Separator Margin="0,15,0,10"/>
+
+                            <TextBlock Text="Grupos Disponibles" FontSize="16" FontWeight="Bold" Foreground="#1C1E21" Margin="0,5,0,10"/>
+                            <TextBox Text="{Binding GroupSearchText, UpdateSourceTrigger=PropertyChanged}" Tag="Buscar grupo..." Style="{StaticResource RoundedTextBoxStyle}" Padding="5" Margin="0,0,0,10"/>
+
+                            <ListBox ItemsSource="{Binding AvailableGroups}" BorderThickness="0" HorizontalContentAlignment="Stretch" MaxHeight="180" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <CheckBox Content="{Binding Group.group_name}" 
+                                      IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                      ToolTip="{Binding Group.description}"
+                                      Margin="5"/>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+
+                            <Button Content="Agregar Grupos" 
+                        Command="{Binding AddSelectedGroupsCommand}" 
+                        Style="{StaticResource PrimaryButtonStyle}" 
+                        HorizontalAlignment="Right" 
+                        Margin="0,10,0,0"/>
+
+                            <Separator Margin="0,20,0,10"/>
+                            <TextBlock Text="Grupos Asignados" FontSize="16" FontWeight="Bold" Foreground="#1C1E21" Margin="0,5,0,10"/>
+                            <ItemsControl x:Name="AssignedGroupsControl" ItemsSource="{Binding AssignedGroups}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#E2E8F0" CornerRadius="12" Padding="10,6" Margin="0,0,8,8"
+                    Tag="{Binding DataContext, ElementName=AssignedGroupsControl}">
+                                            <Border.ContextMenu>
+                                                <ContextMenu>
+                                                    <MenuItem Header="Eliminar"
+                                  Command="{Binding PlacementTarget.Tag.RemoveAssignedGroupCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                  CommandParameter="{Binding}"/>
+                                                </ContextMenu>
+                                            </Border.ContextMenu>
+
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding group_name}" FontWeight="SemiBold" Foreground="#2D3748" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                            </ItemsControl>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
             </Border>
         </Grid>
     </Grid>

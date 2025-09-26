@@ -392,4 +392,118 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+    <!-- 🎯 Botón de FILTRAR -->
+    <Style x:Key="FiltroButtonStyle" TargetType="Button">
+        <Setter Property="Width" Value="32"/>
+        <Setter Property="Height" Value="32"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="Foreground" Value="#041a23"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="ToolTip" Value="Filtrar"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal"/>
+                                <VisualState x:Name="PointerOver">
+                                    <Storyboard>
+                                        <ColorAnimation Duration="0" To="#1a3d4d" Storyboard.TargetProperty="(Path.Fill).(SolidColorBrush.Color)" Storyboard.TargetName="path"/>
+                                    </Storyboard>
+                                </VisualState>
+                                <VisualState x:Name="Pressed">
+                                    <Storyboard>
+                                        <ColorAnimation Duration="0" To="#1a3d4d" Storyboard.TargetProperty="(Path.Fill).(SolidColorBrush.Color)" Storyboard.TargetName="path"/>
+                                        <DoubleAnimation Duration="0" To="0.9" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" Storyboard.TargetName="viewbox"/>
+                                        <DoubleAnimation Duration="0" To="0.9" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" Storyboard.TargetName="viewbox"/>
+                                    </Storyboard>
+                                </VisualState>
+                                <VisualState x:Name="Disabled"/>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+
+                        <Viewbox x:Name="viewbox" Width="30" Height="30" RenderTransformOrigin="0.5,0.5">
+                            <Viewbox.RenderTransform>
+                                <ScaleTransform/>
+                            </Viewbox.RenderTransform>
+                            <Path x:Name="path" Data="M3,5 C3,4.44772 3.44772,4 4,4 H20 C20.5523,4 21,4.44772 21,5 V7 C21,7.26522 20.8946,7.51957 20.7071,7.70711 L14,14.4142 V19 C14,19.5523 13.5523,20 13,20 L11,20 C10.4477,20 10,19.5523 10,19 V14.4142 L3.29289,7.70711 C3.10536,7.51957 3,7.26522 3,7 V5 Z"
+              Fill="{TemplateBinding Foreground}">
+                                <Path.Effect>
+                                    <DropShadowEffect BlurRadius="4" ShadowDepth="1" Opacity="0.4"/>
+                                </Path.Effect>
+                            </Path>
+                        </Viewbox>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- 🧹 Botón de LIMPIAR FILTROS -->
+    <Style x:Key="BorrarFiltroButtonStyle" TargetType="Button">
+        <Setter Property="Width" Value="32"/>
+        <Setter Property="Height" Value="32"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="Foreground" Value="#041a23"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="ToolTip" Value="Limpiar Filtros"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}" CornerRadius="8">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal"/>
+                                <VisualState x:Name="PointerOver">
+                                    <Storyboard>
+                                        <ColorAnimation Duration="0" To="#1a3d4d" Storyboard.TargetProperty="(Path.Fill).(SolidColorBrush.Color)" Storyboard.TargetName="filterPath"/>
+                                        <ColorAnimation Duration="0" To="#1a3d4d" Storyboard.TargetProperty="(Line.Stroke).(SolidColorBrush.Color)" Storyboard.TargetName="line"/>
+                                    </Storyboard>
+                                </VisualState>
+                                <VisualState x:Name="Pressed">
+                                    <Storyboard>
+                                        <ColorAnimation Duration="0" To="#1a3d4d" Storyboard.TargetProperty="(Path.Fill).(SolidColorBrush.Color)" Storyboard.TargetName="filterPath"/>
+                                        <ColorAnimation Duration="0" To="#1a3d4d" Storyboard.TargetProperty="(Line.Stroke).(SolidColorBrush.Color)" Storyboard.TargetName="line"/>
+                                        <DoubleAnimation Duration="0" To="0.9" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" Storyboard.TargetName="viewbox"/>
+                                        <DoubleAnimation Duration="0" To="0.9" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" Storyboard.TargetName="viewbox"/>
+                                    </Storyboard>
+                                </VisualState>
+                                <VisualState x:Name="Disabled"/>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+
+                        <Viewbox x:Name="viewbox" Width="30" Height="30" RenderTransformOrigin="0.5,0.5">
+                            <Viewbox.RenderTransform>
+                                <ScaleTransform/>
+                            </Viewbox.RenderTransform>
+                            <Canvas Width="20" Height="20">
+                                <!-- Icono de filtro -->
+                                <Path x:Name="filterPath" Data="M3,5 C3,4.44772 3.44772,4 4,4 H20 C20.5523,4 21,4.44772 21,5 V7 C21,7.26522 20.8946,7.51957 20.7071,7.70711 L14,14.4142 V19 C14,19.5523 13.5523,20 13,20 L11,20 C10.4477,20 10,19.5523 10,19 V14.4142 L3.29289,7.70711 C3.10536,7.51957 3,7.26522 3,7 V5 Z"
+                                    Fill="{TemplateBinding Foreground}">
+                                    <Path.Effect>
+                                        <DropShadowEffect BlurRadius="4" ShadowDepth="1" Opacity="0.4"/>
+                                    </Path.Effect>
+                                </Path>
+
+                                <!-- Línea diagonal (tachado) -->
+                                <Line x:Name="line" X1="2" Y1="2" X2="19" Y2="19"
+                                  Stroke="{TemplateBinding Foreground}"
+                                  StrokeThickness="1.5"
+                                  StrokeStartLineCap="Round"
+                                  StrokeEndLineCap="Round">
+                                    <Line.Effect>
+                                        <DropShadowEffect BlurRadius="4" ShadowDepth="1" Opacity="0.4"/>
+                                    </Line.Effect>
+                                </Line>
+                            </Canvas>
+                        </Viewbox>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 </ResourceDictionary>

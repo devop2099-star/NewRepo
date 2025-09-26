@@ -1,6 +1,8 @@
 ﻿using Naviguard.ViewModels;
 using System.Windows;
 using System.Windows.Input;
+using Naviguard.Login;
+using System.Diagnostics;
 
 namespace Naviguard.Views
 {
@@ -10,9 +12,15 @@ namespace Naviguard.Views
         private EditGroups _editGroups;
         private AssignUserToGroups _assignUserToGroups;
 
-        public MenuMain()
+        public MenuMain(bool hasAdminAccess)
         {
             InitializeComponent();
+
+            var adminVisibility = hasAdminAccess ? Visibility.Visible : Visibility.Collapsed;
+            btnFilterPages.Visibility = adminVisibility;
+            btnEditGroups.Visibility = adminVisibility;
+            btnAssignUserToGroups.Visibility = adminVisibility;
+
             btnNav_Click(null, null);
         }
 
@@ -74,6 +82,13 @@ namespace Naviguard.Views
             ContentPresenter.Content = _assignUserToGroups;
         }
 
-        
+        private void btnLogout_Click(object sender, RoutedEventArgs e)
+        {
+            UserSession.EndSession();
+
+            Process.Start(Process.GetCurrentProcess().MainModule.FileName);
+
+            Application.Current.Shutdown();
+        }
     }
 }
