@@ -25,11 +25,9 @@ namespace Naviguard.Views
             _paginaActual = pagina;
             var credRepo = new PageCredentialRepository();
 
-            // CORRECCIÓN 2: El 'await' ahora funciona correctamente
             _credencialActual = await credRepo.ObtenerCredencialPorPaginaAsync(pagina.page_id);
             _isAutoLoginRunning = false;
 
-            // Tu lógica de proxy aquí...
             if (pagina.requires_proxy && proxyInfo != null)
             {
                 var requestContext = Browser.RequestContext ?? new RequestContext();

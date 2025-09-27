@@ -77,10 +77,10 @@
 
             <Border Grid.Column="0" Background="White" CornerRadius="30" Padding="20" Effect="{DynamicResource ShadowEffect}">
                 <ScrollViewer VerticalScrollBarVisibility="Hidden">
-                    <ListBox ItemsSource="{Binding FilteredUsers}" 
-                             SelectedItem="{Binding SelectedUser, Mode=TwoWay}"
-                             Background="Transparent" BorderThickness="0"
-                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    <ListBox x:Name="UsersListBox" ItemsSource="{Binding FilteredUsers}"
+                 SelectedItem="{Binding SelectedUser, Mode=TwoWay}"
+                 Background="Transparent" BorderThickness="0"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
 
                         <ListBox.ItemContainerStyle>
                             <Style TargetType="ListBoxItem">
@@ -98,7 +98,17 @@
 
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <Border Background="#F0F2F5" CornerRadius="15" Padding="12,8" Cursor="Hand">
+                                <Border Background="#F0F2F5" CornerRadius="15" Padding="12,8" Cursor="Hand"
+                            Tag="{Binding DataContext, ElementName=UsersListBox}">
+
+                                    <Border.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="Asignar Credenciales de Página"
+                                          Command="{Binding PlacementTarget.Tag.OpenCredentialsWindowCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                          CommandParameter="{Binding}"/>
+                                        </ContextMenu>
+                                    </Border.ContextMenu>
+
                                     <TextBlock Text="{Binding full_name}" FontWeight="SemiBold" Foreground="#1C1E21"/>
                                 </Border>
                             </DataTemplate>

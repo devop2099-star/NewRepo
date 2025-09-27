@@ -1,7 +1,6 @@
 ﻿using Naviguard.ViewModels;
 using System.Windows;
 using System.Windows.Input;
-using Naviguard.Login;
 using System.Diagnostics;
 
 namespace Naviguard.Views

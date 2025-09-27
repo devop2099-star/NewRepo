@@ -13,11 +13,11 @@ namespace Naviguard.Repositories
             {
                 await conn.OpenAsync();
                 var sql = @"
-                    INSERT INTO browser_app.pages 
-                    (page_name, description, url, requires_proxy, requires_login, created_at, state) 
-                    VALUES 
-                    (@page_name, @description, @url, @requires_proxy, @requires_login, @created_at, @state)
-                    RETURNING page_id;";
+                INSERT INTO browser_app.pages 
+                (page_name, description, url, requires_proxy, requires_login, requires_custom_login, state, created_at) 
+                VALUES 
+                (@page_name, @description, @url, @requires_proxy, @requires_login, @requires_custom_login, @state, @created_at)
+                RETURNING page_id;";
 
                 using (var cmd = new NpgsqlCommand(sql, conn))
                 {
@@ -26,8 +26,9 @@ namespace Naviguard.Repositories
                     cmd.Parameters.AddWithValue("@url", newPage.url);
                     cmd.Parameters.AddWithValue("@requires_proxy", newPage.requires_proxy);
                     cmd.Parameters.AddWithValue("@requires_login", newPage.requires_login);
-                    cmd.Parameters.AddWithValue("@created_at", newPage.created_at);
+                    cmd.Parameters.AddWithValue("@requires_custom_login", newPage.requires_custom_login);
                     cmd.Parameters.AddWithValue("@state", newPage.state);
+                    cmd.Parameters.AddWithValue("@created_at", newPage.created_at);
 
                     var newId = await cmd.ExecuteScalarAsync();
                     return Convert.ToInt64(newId);
@@ -105,19 +106,25 @@ namespace Naviguard.Repositories
                 }
             }
         }
+
         public async Task UpdatePageAsync(Pagina page)
         {
             using (var conn = ConexionBD.ObtenerConexionNaviguard())
             {
                 await conn.OpenAsync();
-                // Se quita "pin = @pin" de la consulta
-                var sql = @"UPDATE browser_app.pages SET
-                        page_name = @page_name,
-                        description = @description,
-                        url = @url,
-                        requires_proxy = @requires_proxy,
-                        requires_login = @requires_login
-                    WHERE page_id = @page_id";
+
+                var sql = @"
+            UPDATE browser_app.pages
+            SET 
+                page_name = @page_name,
+                description = @description,
+                url = @url,
+                requires_proxy = @requires_proxy,
+                requires_login = @requires_login,
+                requires_custom_login = @requires_custom_login
+            WHERE 
+                page_id = @page_id;";
+
                 using (var cmd = new NpgsqlCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@page_name", page.page_name);
@@ -125,8 +132,10 @@ namespace Naviguard.Repositories
                     cmd.Parameters.AddWithValue("@url", page.url);
                     cmd.Parameters.AddWithValue("@requires_proxy", page.requires_proxy);
                     cmd.Parameters.AddWithValue("@requires_login", page.requires_login);
-                    // Se quita el parámetro @pin
+                    cmd.Parameters.AddWithValue("@requires_custom_login", page.requires_custom_login);
+
                     cmd.Parameters.AddWithValue("@page_id", page.page_id);
+
                     await cmd.ExecuteNonQueryAsync();
                 }
             }
@@ -138,8 +147,14 @@ namespace Naviguard.Repositories
             using (var conn = ConexionBD.ObtenerConexionNaviguard())
             {
                 conn.Open();
-                // Se quita "pin" del SELECT y del ORDER BY
-                var sql = "SELECT page_id, page_name, url, description, requires_proxy, requires_login, created_at, state FROM browser_app.pages ORDER BY page_name";
+                var sql = @"
+            SELECT page_id, page_name, description, url, 
+                   requires_proxy, requires_login, requires_custom_login, 
+                   state, created_at 
+            FROM browser_app.pages 
+            WHERE state = 1 
+            ORDER BY page_name;";
+
                 using (var cmd = new NpgsqlCommand(sql, conn))
                 using (var reader = cmd.ExecuteReader())
                 {
@@ -149,13 +164,13 @@ namespace Naviguard.Repositories
                         {
                             page_id = Convert.ToInt64(reader["page_id"]),
                             page_name = reader["page_name"].ToString(),
+                            description = reader["description"]?.ToString(),
                             url = reader["url"].ToString(),
-                            description = reader["description"].ToString(),
                             requires_proxy = Convert.ToBoolean(reader["requires_proxy"]),
                             requires_login = Convert.ToBoolean(reader["requires_login"]),
-                            created_at = Convert.ToDateTime(reader["created_at"]),
+                            requires_custom_login = Convert.ToBoolean(reader["requires_custom_login"]),
                             state = Convert.ToInt16(reader["state"]),
-                            // Se quita la asignación de "pin"
+                            created_at = Convert.ToDateTime(reader["created_at"])
                         });
                     }
                 }
@@ -238,5 +253,44 @@ namespace Naviguard.Repositories
                 }
             }
         }
+
+        public async Task<List<Pagina>> GetPagesRequiringCustomLoginAsync()
+        {
+            Debug.WriteLine("[PaginaRepository] Buscando páginas con login personalizado...");
+            var paginas = new List<Pagina>();
+            using (var conn = ConexionBD.ObtenerConexionNaviguard())
+            {
+                await conn.OpenAsync();
+                var sql = @"SELECT page_id, page_name, description, url, 
+                           requires_proxy, requires_login, requires_custom_login, 
+                           state, created_at 
+                    FROM browser_app.pages 
+                    WHERE requires_custom_login = true AND state = 1 
+                    ORDER BY page_name;";
+
+                using (var cmd = new NpgsqlCommand(sql, conn))
+                using (var reader = await cmd.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        paginas.Add(new Pagina
+                        {
+                            page_id = reader.GetInt64(reader.GetOrdinal("page_id")),
+                            page_name = reader.GetString(reader.GetOrdinal("page_name")),
+                            description = reader.IsDBNull(reader.GetOrdinal("description")) ? null : reader.GetString(reader.GetOrdinal("description")),
+                            url = reader.GetString(reader.GetOrdinal("url")),
+                            requires_proxy = reader.GetBoolean(reader.GetOrdinal("requires_proxy")),
+                            requires_login = reader.GetBoolean(reader.GetOrdinal("requires_login")),
+                            requires_custom_login = reader.GetBoolean(reader.GetOrdinal("requires_custom_login")),
+                            state = reader.GetInt16(reader.GetOrdinal("state")),
+                            created_at = reader.GetDateTime(reader.GetOrdinal("created_at"))
+                        });
+                    }
+                }
+            }
+            Debug.WriteLine($"[PaginaRepository] Consulta finalizada. Se encontraron {paginas.Count} páginas."); // DEBUG
+            return paginas;
+        }
+
     }
 }

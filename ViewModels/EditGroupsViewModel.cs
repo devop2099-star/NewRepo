@@ -40,6 +40,7 @@ namespace Naviguard.ViewModels
         [ObservableProperty] private string _editPageUrl;
         [ObservableProperty] private bool _editRequiresProxy;
         [ObservableProperty] private bool _editRequiresLogin;
+        [ObservableProperty] private bool _editRequiresCustomLogin;
         [ObservableProperty] private string _editCredentialUsername;
         [ObservableProperty] private string _editCredentialPassword;
 
@@ -251,29 +252,24 @@ namespace Naviguard.ViewModels
             UpdatePageCommand.NotifyCanExecuteChanged();
             if (SelectedPage == null) return;
 
-            Debug.WriteLine($"\n--- [VIEWMODEL] OnPageSelected ejecutado para la página: '{SelectedPage?.page_name}' (ID: {SelectedPage.page_id}) ---");
-
-            // Asigna los datos básicos de la página
             EditPageName = SelectedPage.page_name;
             EditPageDescription = SelectedPage.description;
             EditPageUrl = SelectedPage.url;
             EditRequiresProxy = SelectedPage.requires_proxy;
             EditRequiresLogin = SelectedPage.requires_login;
+            EditRequiresCustomLogin = SelectedPage.requires_custom_login;
 
             EditCredentialUsername = string.Empty;
             EditCredentialPassword = string.Empty;
 
             if (SelectedPage.requires_login)
             {
-                Debug.WriteLine("[VIEWMODEL] La página requiere login. Llamando al repositorio para obtener credenciales...");
                 var credential = await _paginaRepository.GetCredentialForPageAsync(SelectedPage.page_id);
 
                 if (credential != null)
                 {
-                    Debug.WriteLine("[VIEWMODEL] El repositorio devolvió un objeto credencial. Actualizando campos de la UI...");
                     EditCredentialUsername = credential.Username;
                     EditCredentialPassword = credential.Password;
-                    Debug.WriteLine($"[VIEWMODEL] Campos de UI actualizados: Username='{EditCredentialUsername}', Password='{EditCredentialPassword}'");
                 }
                 else
                 {
@@ -347,6 +343,8 @@ namespace Naviguard.ViewModels
             SelectedPage.url = EditPageUrl;
             SelectedPage.requires_proxy = EditRequiresProxy;
             SelectedPage.requires_login = EditRequiresLogin;
+            SelectedPage.requires_custom_login = EditRequiresCustomLogin;
+
             try
             {
                 await _paginaRepository.UpdatePageAsync(SelectedPage);
@@ -355,7 +353,7 @@ namespace Naviguard.ViewModels
                     await _paginaRepository.UpdateOrInsertCredentialAsync(SelectedPage.page_id, EditCredentialUsername, EditCredentialPassword);
                 }
                 MessageBox.Show("Página actualizada correctamente.", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
-                LoadPageData(); 
+                LoadPageData();
             }
             catch (Exception ex)
             {

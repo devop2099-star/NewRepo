@@ -8,6 +8,7 @@
         public string url { get; set; }
         public bool requires_proxy { get; set; }
         public bool requires_login { get; set; }
+        public bool requires_custom_login { get; set; }
         public DateTime created_at { get; set; }
         public short state { get; set; }
         public short pin_in_group { get; set; }

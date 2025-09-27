@@ -24,6 +24,9 @@ public class FilterPagesViewModel : ObservableObject
     private bool _requiresLogin;
     public bool RequiresLogin { get => _requiresLogin; set => SetProperty(ref _requiresLogin, value); }
 
+    private bool _requiresCustomLogin;
+    public bool RequiresCustomLogin { get => _requiresCustomLogin; set => SetProperty(ref _requiresCustomLogin, value); }
+
     private string _groupName;
     public string GroupName { get => _groupName; set => SetProperty(ref _groupName, value); }
 
@@ -78,17 +81,17 @@ public class FilterPagesViewModel : ObservableObject
             return;
         }
 
-        var newPage = new Pagina 
+        var newPage = new Pagina
         {
             page_name = this.PageName,
             description = this.PageDescription,
             url = this.PageUrl,
             requires_proxy = this.RequiresProxy,
             requires_login = this.RequiresLogin,
+            requires_custom_login = this.RequiresCustomLogin, 
             state = 1,
             created_at = DateTime.UtcNow
         };
-
         try
         {
             long newPageId = await _paginaRepository.AddPageAsync(newPage);
@@ -104,6 +107,7 @@ public class FilterPagesViewModel : ObservableObject
             PageUrl = string.Empty;
             RequiresProxy = false;
             RequiresLogin = false;
+            RequiresCustomLogin = false; 
 
             LoadAvailablePages();
         }

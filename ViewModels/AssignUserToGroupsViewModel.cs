@@ -3,7 +3,10 @@ using CommunityToolkit.Mvvm.Input;
 using Naviguard.BusinessInfo.Models;
 using Naviguard.Models;
 using Naviguard.Repositories;
+using Naviguard.Views;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Windows;
 using System.Windows.Input; 
 
 namespace Naviguard.BusinessInfo.ViewModels
@@ -35,7 +38,8 @@ namespace Naviguard.BusinessInfo.ViewModels
         public IAsyncRelayCommand FilterCommand { get; }
         public ICommand AddSelectedGroupsCommand { get; }
         public ICommand ClearFilterCommand { get; }
-        public IAsyncRelayCommand<Group> RemoveAssignedGroupCommand { get; } 
+        public IAsyncRelayCommand<Group> RemoveAssignedGroupCommand { get; }
+        public IRelayCommand<FilteredUser> OpenCredentialsWindowCommand { get; }
 
         public AssignUserToGroupsViewModel()
         {
@@ -54,7 +58,8 @@ namespace Naviguard.BusinessInfo.ViewModels
             FilterCommand = new AsyncRelayCommand(FilterUsersAsync);
             ClearFilterCommand = new RelayCommand(ClearFilters);
             AddSelectedGroupsCommand = new AsyncRelayCommand(AddSelectedGroupsAsync);
-            RemoveAssignedGroupCommand = new AsyncRelayCommand<Group>(RemoveAssignedGroupAsync); 
+            RemoveAssignedGroupCommand = new AsyncRelayCommand<Group>(RemoveAssignedGroupAsync);
+            OpenCredentialsWindowCommand = new RelayCommand<FilteredUser>(OpenCredentialsWindow);
 
             LoadDepartmentsAsync();
         }
@@ -206,6 +211,21 @@ namespace Naviguard.BusinessInfo.ViewModels
                     Subareas.Add(sub);
                 }
             }
+        }
+
+        private void OpenCredentialsWindow(FilteredUser user)
+        {
+            if (user == null)
+            {
+                Debug.WriteLine("[AssignUserToGroupsVM] Se intentó abrir la ventana de credenciales pero el usuario era nulo."); // DEBUG
+                return;
+            }
+
+            Debug.WriteLine($"[AssignUserToGroupsVM] Abriendo ventana de credenciales para el usuario: '{user.full_name}' (ID: {user.id_user})"); // DEBUG
+
+            var credentialsWindow = new CredentialsUserPage(user);
+            credentialsWindow.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            credentialsWindow.ShowDialog();
         }
     }
 }
