@@ -1,6 +1,7 @@
 ﻿using Naviguard.Connections;
 using Naviguard.Models;
 using Npgsql;
+using System.Diagnostics;
 
 namespace Naviguard.Repositories
 {
@@ -20,6 +21,14 @@ namespace Naviguard.Repositories
                     cmd.Parameters.AddWithValue("@userId", userId);
                     cmd.Parameters.AddWithValue("@pageId", pageId);
 
+                    Debug.WriteLine("--- Ejecutando Consulta SQL ---");
+                    Debug.WriteLine(cmd.CommandText); 
+                    foreach (NpgsqlParameter p in cmd.Parameters)
+                    {
+                        Debug.WriteLine($"--> {p.ParameterName}: {p.Value}");
+                    }
+                    Debug.WriteLine("-----------------------------");
+
                     using (var reader = await cmd.ExecuteReaderAsync())
                     {
                         if (await reader.ReadAsync())
@@ -36,7 +45,7 @@ namespace Naviguard.Repositories
                     }
                 }
             }
-            return null; 
+            return null;
         }
 
         public async Task UpdateOrInsertCredentialAsync(long userId, long pageId, string username, string password)

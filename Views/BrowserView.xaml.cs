@@ -2,6 +2,7 @@
 using Naviguard.Handlers;
 using Naviguard.Models;
 using Naviguard.Repositories;
+using System.Diagnostics;
 using System.Windows.Controls;
 
 namespace Naviguard.Views
@@ -9,7 +10,7 @@ namespace Naviguard.Views
     public partial class BrowserView : UserControl
     {
         private Pagina _paginaActual;
-        private PageCredential? _credencialActual;
+        private (string Username, string Password)? _loginCredentials;
         private bool _isAutoLoginRunning = false;
 
         public BrowserView()
@@ -22,11 +23,46 @@ namespace Naviguard.Views
 
         public async Task LoadPage(Pagina pagina, ProxyInfo? proxyInfo = null)
         {
-            _paginaActual = pagina;
-            var credRepo = new PageCredentialRepository();
+            Debug.WriteLine($"[BrowserView] Iniciando LoadPage para: '{pagina.page_name}' (ID: {pagina.page_id})");
 
-            _credencialActual = await credRepo.ObtenerCredencialPorPaginaAsync(pagina.page_id);
+            _paginaActual = pagina;
+            _loginCredentials = null;
             _isAutoLoginRunning = false;
+
+            // ===== INICIO DE CAMBIO IMPORTANTE: TRY-CATCH =====
+            try
+            {
+                // Lógica de decisión de credenciales
+                if (UserSession.IsLoggedIn)
+                {
+                    if (pagina.requires_custom_login)
+                    {
+                        var customCredRepo = new CredentialRepository();
+                        var customCredential = await customCredRepo.GetCredentialAsync(UserSession.ApiUserId, pagina.page_id);
+                        if (customCredential != null)
+                        {
+                            _loginCredentials = (customCredential.username, customCredential.password);
+                        }
+                    }
+                    else if (pagina.requires_login)
+                    {
+                        var generalCredRepo = new PageCredentialRepository();
+                        var generalCredential = await generalCredRepo.ObtenerCredencialPorPaginaAsync(pagina.page_id);
+                        if (generalCredential != null)
+                        {
+                            _loginCredentials = (generalCredential.Username, generalCredential.Password);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Si algo falla al buscar credenciales, lo veremos aquí
+                Debug.WriteLine($"[BrowserView] ERROR AL BUSCAR CREDENCIALES: {ex.Message}");
+            }
+            // ===== FIN DE CAMBIO IMPORTANTE: TRY-CATCH =====
+
+            Debug.WriteLine($"[BrowserView] Credenciales encontradas: {(_loginCredentials.HasValue ? "Sí" : "No")}");
 
             if (pagina.requires_proxy && proxyInfo != null)
             {
@@ -42,18 +78,19 @@ namespace Naviguard.Views
             {
                 Browser.RequestHandler = null;
             }
-
+            Debug.WriteLine($"[BrowserView] Cargando URL: {pagina.url}");
             Browser.Load(pagina.url);
         }
-
 
         private void Browser_FrameLoadEnd(object sender, FrameLoadEndEventArgs e)
         {
             if (e.Frame.IsMain)
             {
-                if (_credencialActual != null && !_isAutoLoginRunning)
+                Debug.WriteLine($"[BrowserView] FrameLoadEnd para: {e.Url}. ¿Hay credenciales?: {(_loginCredentials.HasValue ? "Sí" : "No")}");
+                if (_loginCredentials != null && !_isAutoLoginRunning)
                 {
                     _isAutoLoginRunning = true;
+                    Debug.WriteLine("[BrowserView] Ejecutando AutoLogin...");
                     EjecutarAutoLogin();
                 }
             }
@@ -64,14 +101,15 @@ namespace Naviguard.Views
             try
             {
                 await Browser.GetMainFrame().EvaluateScriptAsync($@"
-                    document.getElementById('txtemail').value = '{_credencialActual.Username}';
-                    document.getElementById('txtpas').value = '{_credencialActual.Password}';
+                    document.getElementById('txtemail').value = '{_loginCredentials.Value.Username}';
+                    document.getElementById('txtpas').value = '{_loginCredentials.Value.Password}';
                     document.getElementById('txtcarac').value = document.getElementById('txtcodcarac').value;
                     document.querySelector('.btn_access').click();
                 ");
             }
-            catch
+            catch (Exception ex)
             {
+                Debug.WriteLine($"[BrowserView] Error en EjecutarAutoLogin: {ex.Message}");
             }
             finally
             {

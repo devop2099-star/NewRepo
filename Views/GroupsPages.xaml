@@ -7,7 +7,7 @@
              xmlns:vm="clr-namespace:Naviguard.ViewModels"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="900"
-             Background="#F7F9FC">
+             Background="White">
 
     <UserControl.DataContext>
         <vm:GroupsPagesViewModel/>
