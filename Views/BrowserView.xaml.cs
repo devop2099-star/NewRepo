@@ -29,40 +29,48 @@ namespace Naviguard.Views
             _loginCredentials = null;
             _isAutoLoginRunning = false;
 
-            // ===== INICIO DE CAMBIO IMPORTANTE: TRY-CATCH =====
             try
             {
-                // Lógica de decisión de credenciales
                 if (UserSession.IsLoggedIn)
                 {
                     if (pagina.requires_custom_login)
                     {
+                        Debug.WriteLine($"[BrowserView] 🔎 Buscando credencial PERSONALIZADA para User: {UserSession.ApiUserId}, Page: {pagina.page_id}");
                         var customCredRepo = new CredentialRepository();
                         var customCredential = await customCredRepo.GetCredentialAsync(UserSession.ApiUserId, pagina.page_id);
                         if (customCredential != null)
                         {
                             _loginCredentials = (customCredential.username, customCredential.password);
+                            Debug.WriteLine($"[BrowserView] ✅ Credencial PERSONALIZADA encontrada. Usuario: '{_loginCredentials.Value.Username}'");
+                        }
+                        else
+                        {
+                            Debug.WriteLine($"[BrowserView] ❌ NO se encontró credencial PERSONALIZADA.");
                         }
                     }
                     else if (pagina.requires_login)
                     {
+                        Debug.WriteLine($"[BrowserView] 🔎 Buscando credencial GENERAL para Page: {pagina.page_id}");
                         var generalCredRepo = new PageCredentialRepository();
                         var generalCredential = await generalCredRepo.ObtenerCredencialPorPaginaAsync(pagina.page_id);
                         if (generalCredential != null)
                         {
                             _loginCredentials = (generalCredential.Username, generalCredential.Password);
+                            Debug.WriteLine($"[BrowserView] ✅ Credencial GENERAL encontrada. Usuario: '{_loginCredentials.Value.Username}'");
+                        }
+                        else
+                        {
+                            Debug.WriteLine($"[BrowserView] ❌ NO se encontró credencial GENERAL.");
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                // Si algo falla al buscar credenciales, lo veremos aquí
-                Debug.WriteLine($"[BrowserView] ERROR AL BUSCAR CREDENCIALES: {ex.Message}");
+                Debug.WriteLine($"[BrowserView] 💥 ERROR AL BUSCAR CREDENCIALES: {ex.Message}");
             }
-            // ===== FIN DE CAMBIO IMPORTANTE: TRY-CATCH =====
 
-            Debug.WriteLine($"[BrowserView] Credenciales encontradas: {(_loginCredentials.HasValue ? "Sí" : "No")}");
+            Debug.WriteLine($"[BrowserView] Resumen: ¿Credenciales listas para usar? -> {(_loginCredentials.HasValue ? "Sí" : "No")}");
 
             if (pagina.requires_proxy && proxyInfo != null)
             {
@@ -96,20 +104,28 @@ namespace Naviguard.Views
             }
         }
 
-        private async void EjecutarAutoLogin()
+       private async void EjecutarAutoLogin()
         {
+            if (!_loginCredentials.HasValue) return; 
+
             try
             {
-                await Browser.GetMainFrame().EvaluateScriptAsync($@"
+                Debug.WriteLine($"[BrowserView] 💉 Inyectando login con Usuario: '{_loginCredentials.Value.Username}'");
+
+                string script = $@"
                     document.getElementById('txtemail').value = '{_loginCredentials.Value.Username}';
                     document.getElementById('txtpas').value = '{_loginCredentials.Value.Password}';
                     document.getElementById('txtcarac').value = document.getElementById('txtcodcarac').value;
                     document.querySelector('.btn_access').click();
-                ");
+                ";
+
+                Debug.WriteLine($"[BrowserView] 📋 Ejecutando script JS:\n{script}");
+
+                await Browser.GetMainFrame().EvaluateScriptAsync(script);
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"[BrowserView] Error en EjecutarAutoLogin: {ex.Message}");
+                Debug.WriteLine($"[BrowserView] 💥 Error en EjecutarAutoLogin: {ex.Message}");
             }
             finally
             {

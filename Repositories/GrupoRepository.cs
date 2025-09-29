@@ -15,11 +15,14 @@ namespace Naviguard.Repositories
             {
                 conn.Open();
                 var sql = @"
-                SELECT p.page_id, p.page_name, p.url, p.requires_proxy, p.requires_login, p.state, gp.pin
-                FROM browser_app.pages p
-                INNER JOIN browser_app.group_pages gp ON p.page_id = gp.page_id
-                WHERE gp.group_id = @group_id AND p.state = 1
-                ORDER BY gp.pin DESC, p.page_name;";
+        SELECT 
+            p.page_id, p.page_name, p.url, 
+            p.requires_proxy, p.requires_login, p.requires_custom_login, -- <-- 1. CAMBIO AQUÍ
+            p.state, gp.pin
+        FROM browser_app.pages p
+        INNER JOIN browser_app.group_pages gp ON p.page_id = gp.page_id
+        WHERE gp.group_id = @group_id AND p.state = 1
+        ORDER BY gp.pin DESC, p.page_name;";
 
                 using (var cmd = new NpgsqlCommand(sql, conn))
                 {
@@ -35,6 +38,8 @@ namespace Naviguard.Repositories
                                 url = reader["url"].ToString(),
                                 requires_proxy = Convert.ToBoolean(reader["requires_proxy"]),
                                 requires_login = Convert.ToBoolean(reader["requires_login"]),
+                                // VVVV 2. CAMBIO AQUÍ VVVV
+                                requires_custom_login = Convert.ToBoolean(reader["requires_custom_login"]),
                                 state = Convert.ToInt16(reader["state"]),
                                 pin_in_group = reader["pin"] == DBNull.Value ? (short)0 : Convert.ToInt16(reader["pin"])
                             });
