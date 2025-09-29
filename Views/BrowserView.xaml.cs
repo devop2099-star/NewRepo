@@ -86,7 +86,7 @@ namespace Naviguard.Views
             {
                 Browser.RequestHandler = null;
             }
-            Debug.WriteLine($"[BrowserView] Cargando URL: {pagina.url}");
+            Browser.LifeSpanHandler = new BlockPopupsHandler();
             Browser.Load(pagina.url);
         }
 

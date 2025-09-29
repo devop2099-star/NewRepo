@@ -41,6 +41,8 @@
 
                         <CheckBox x:Name="chkRequiresCustomLogin" IsChecked="{Binding RequiresCustomLogin}" Content="Requiere Custom Login" FontWeight="SemiBold" Margin="0,0,0,10" Style="{StaticResource ToggleSwitchStyle}"/>
 
+                        <CheckBox x:Name="chkRequiresRedirects" IsChecked="{Binding RequiresRedirects}" Content="Requiere Redirects" FontWeight="SemiBold" Margin="0,0,0,10" Style="{StaticResource ToggleSwitchStyle}"/>
+
                         <StackPanel>
                             <StackPanel.Style>
                                 <Style TargetType="StackPanel">

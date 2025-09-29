@@ -27,6 +27,9 @@ public class FilterPagesViewModel : ObservableObject
     private bool _requiresCustomLogin;
     public bool RequiresCustomLogin { get => _requiresCustomLogin; set => SetProperty(ref _requiresCustomLogin, value); }
 
+    private bool _requiresRedirects;
+    public bool RequiresRedirects { get => _requiresRedirects; set => SetProperty(ref _requiresRedirects, value); }
+
     private string _groupName;
     public string GroupName { get => _groupName; set => SetProperty(ref _groupName, value); }
 
@@ -88,7 +91,8 @@ public class FilterPagesViewModel : ObservableObject
             url = this.PageUrl,
             requires_proxy = this.RequiresProxy,
             requires_login = this.RequiresLogin,
-            requires_custom_login = this.RequiresCustomLogin, 
+            requires_custom_login = this.RequiresCustomLogin,
+            requires_redirects = this.RequiresRedirects,
             state = 1,
             created_at = DateTime.UtcNow
         };
@@ -107,7 +111,8 @@ public class FilterPagesViewModel : ObservableObject
             PageUrl = string.Empty;
             RequiresProxy = false;
             RequiresLogin = false;
-            RequiresCustomLogin = false; 
+            RequiresCustomLogin = false;
+            RequiresRedirects = false;
 
             LoadAvailablePages();
         }

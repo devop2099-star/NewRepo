@@ -14,9 +14,9 @@ namespace Naviguard.Repositories
                 await conn.OpenAsync();
                 var sql = @"
                 INSERT INTO browser_app.pages 
-                (page_name, description, url, requires_proxy, requires_login, requires_custom_login, state, created_at) 
+                (page_name, description, url, requires_proxy, requires_login, requires_custom_login, requires_redirects, state, created_at) 
                 VALUES 
-                (@page_name, @description, @url, @requires_proxy, @requires_login, @requires_custom_login, @state, @created_at)
+                (@page_name, @description, @url, @requires_proxy, @requires_login, @requires_custom_login, @requires_redirects, @state, @created_at)
                 RETURNING page_id;";
 
                 using (var cmd = new NpgsqlCommand(sql, conn))
@@ -27,6 +27,7 @@ namespace Naviguard.Repositories
                     cmd.Parameters.AddWithValue("@requires_proxy", newPage.requires_proxy);
                     cmd.Parameters.AddWithValue("@requires_login", newPage.requires_login);
                     cmd.Parameters.AddWithValue("@requires_custom_login", newPage.requires_custom_login);
+                    cmd.Parameters.AddWithValue("@requires_redirects", newPage.requires_redirects);
                     cmd.Parameters.AddWithValue("@state", newPage.state);
                     cmd.Parameters.AddWithValue("@created_at", newPage.created_at);
 

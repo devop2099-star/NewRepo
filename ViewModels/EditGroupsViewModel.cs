@@ -41,6 +41,7 @@ namespace Naviguard.ViewModels
         [ObservableProperty] private bool _editRequiresProxy;
         [ObservableProperty] private bool _editRequiresLogin;
         [ObservableProperty] private bool _editRequiresCustomLogin;
+        [ObservableProperty] private bool _editRequiresRedirects; // <--- CORRECCIÓN AQUÍ
         [ObservableProperty] private string _editCredentialUsername;
         [ObservableProperty] private string _editCredentialPassword;
 
@@ -54,7 +55,7 @@ namespace Naviguard.ViewModels
 
         [ObservableProperty] private ObservableCollection<SelectablePageViewModel> _allPagesChecklist;
         public IRelayCommand<SelectablePageViewModel> TogglePinPageInGroupCommand { get; }
-       
+
         public IAsyncRelayCommand<Group> DeleteGroupCommand { get; }
         public IAsyncRelayCommand<Pagina> DeletePageCommand { get; }
 
@@ -83,9 +84,9 @@ namespace Naviguard.ViewModels
             if (groupToDelete == null) return;
 
             var result = MessageBox.Show($"¿Estás seguro de que quieres eliminar el grupo '{groupToDelete.group_name}'?",
-                                         "Confirmar Eliminación",
-                                         MessageBoxButton.YesNo,
-                                         MessageBoxImage.Warning);
+                                          "Confirmar Eliminación",
+                                          MessageBoxButton.YesNo,
+                                          MessageBoxImage.Warning);
 
             if (result == MessageBoxResult.Yes)
             {
@@ -116,9 +117,9 @@ namespace Naviguard.ViewModels
             if (pageToDelete == null) return;
 
             var result = MessageBox.Show($"¿Estás seguro de que quieres eliminar la página '{pageToDelete.page_name}'?",
-                                         "Confirmar Eliminación",
-                                         MessageBoxButton.YesNo,
-                                         MessageBoxImage.Warning);
+                                          "Confirmar Eliminación",
+                                          MessageBoxButton.YesNo,
+                                          MessageBoxImage.Warning);
 
             if (result == MessageBoxResult.Yes)
             {
@@ -149,11 +150,11 @@ namespace Naviguard.ViewModels
             SelectedGroup = null;
             SelectedPage = null;
 
-            if (value) 
+            if (value)
             {
                 LoadPageData();
             }
-            else 
+            else
             {
                 LoadGroupData();
             }
@@ -208,7 +209,7 @@ namespace Naviguard.ViewModels
             UpdateGroupCommand.NotifyCanExecuteChanged();
             if (SelectedGroup == null)
             {
-                AllPagesChecklist.Clear(); 
+                AllPagesChecklist.Clear();
                 return;
             }
 
@@ -218,7 +219,7 @@ namespace Naviguard.ViewModels
 
             var allPagesInSystem = _paginaRepository.ObtenerPaginas();
             var assignedPageIds = new HashSet<long>(SelectedGroup.Paginas.Select(p => p.page_id));
-            var pinnedPageIdsInGroup = SelectedGroup.PinnedPageIds; 
+            var pinnedPageIdsInGroup = SelectedGroup.PinnedPageIds;
 
             AllPagesChecklist.Clear();
             foreach (var page in allPagesInSystem)
@@ -258,6 +259,7 @@ namespace Naviguard.ViewModels
             EditRequiresProxy = SelectedPage.requires_proxy;
             EditRequiresLogin = SelectedPage.requires_login;
             EditRequiresCustomLogin = SelectedPage.requires_custom_login;
+            EditRequiresRedirects = SelectedPage.requires_redirects;
 
             EditCredentialUsername = string.Empty;
             EditCredentialPassword = string.Empty;
@@ -344,6 +346,7 @@ namespace Naviguard.ViewModels
             SelectedPage.requires_proxy = EditRequiresProxy;
             SelectedPage.requires_login = EditRequiresLogin;
             SelectedPage.requires_custom_login = EditRequiresCustomLogin;
+            SelectedPage.requires_redirects = EditRequiresRedirects;
 
             try
             {
